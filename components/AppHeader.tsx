@@ -1,16 +1,20 @@
+import { Ionicons } from "@expo/vector-icons";
+import type {
+  NativeStackHeaderProps,
+  NativeStackHeaderRightProps,
+} from "@react-navigation/native-stack";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, spacing } from "../utils/theme";
 
-type HeaderProps = {
-  navigation: { goBack: () => void };
-  options: { title?: string };
-  back?: { title?: string };
-};
-
-export default function AppHeader({ navigation, options, back }: HeaderProps) {
+export default function AppHeader(props: NativeStackHeaderProps) {
+  const { navigation, options, back } = props;
   const insets = useSafeAreaInsets();
   const title = options.title ?? "";
+  const headerRightProps: NativeStackHeaderRightProps = {
+    tintColor: colors.text,
+    canGoBack: Boolean(back),
+  };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -18,7 +22,7 @@ export default function AppHeader({ navigation, options, back }: HeaderProps) {
         <View style={styles.left}>
           {back ? (
             <Pressable onPress={navigation.goBack} style={styles.backButton}>
-              <Text style={styles.backText}>Back</Text>
+              <Ionicons name="chevron-back" size={22} color={colors.accent} />
             </Pressable>
           ) : null}
         </View>
@@ -27,7 +31,9 @@ export default function AppHeader({ navigation, options, back }: HeaderProps) {
             {title}
           </Text>
         </View>
-        <View style={styles.right} />
+        <View style={styles.right}>
+          {options.headerRight?.(headerRightProps)}
+        </View>
       </View>
     </View>
   );
@@ -54,15 +60,12 @@ const styles = StyleSheet.create({
   },
   right: {
     width: 80,
+    alignItems: "flex-end",
+    justifyContent: "center",
   },
   backButton: {
     paddingVertical: 6,
     paddingHorizontal: 4,
-  },
-  backText: {
-    color: colors.accent,
-    fontSize: 14,
-    fontWeight: "600",
   },
   title: {
     color: colors.text,
