@@ -1,13 +1,12 @@
 import { Stack } from "expo-router";
+import AppHeader from "../components/AppHeader";
 import { colors } from "../utils/theme";
 
 export default function RootLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: colors.background },
-        headerTitleStyle: { color: colors.text, fontWeight: "600" },
-        headerShadowVisible: false,
+        header: (props) => <AppHeader {...props} />,
         contentStyle: { backgroundColor: colors.background },
       }}
     >

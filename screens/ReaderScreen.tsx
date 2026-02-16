@@ -3,13 +3,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
   ViewToken,
 } from "react-native";
 import QuranPageItem from "../components/QuranPageItem";
+import SafeScreen from "../components/SafeScreen";
 import { QuranPage, quranPages } from "../data/quranPages";
 import { getBookmarks, setBookmarks, setLastReadPage } from "../utils/storage";
 import { colors, spacing } from "../utils/theme";
@@ -81,7 +81,7 @@ export default function ReaderScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeScreen>
       <FlatList
         ref={listRef}
         data={quranPages}
@@ -109,15 +109,11 @@ export default function ReaderScreen() {
       <View style={styles.footer}>
         <Text style={styles.footerText}>Continuous Mushaf View</Text>
       </View>
-    </SafeAreaView>
+    </SafeScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   list: {
     paddingTop: spacing.md,
     paddingBottom: spacing.xl,

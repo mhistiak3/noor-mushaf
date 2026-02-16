@@ -1,7 +1,8 @@
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { FlatList, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import ListItem from "../components/ListItem";
+import SafeScreen from "../components/SafeScreen";
 import { getBookmarks } from "../utils/storage";
 import { colors, spacing } from "../utils/theme";
 
@@ -23,7 +24,7 @@ export default function BookmarkScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeScreen>
       <FlatList
         contentContainerStyle={styles.list}
         data={bookmarks}
@@ -48,15 +49,11 @@ export default function BookmarkScreen() {
           </View>
         )}
       />
-    </SafeAreaView>
+    </SafeScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   list: {
     padding: spacing.lg,
     paddingBottom: spacing.xl,

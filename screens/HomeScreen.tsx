@@ -3,13 +3,13 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Modal,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
+import SafeScreen from "../components/SafeScreen";
 import SectionCard from "../components/SectionCard";
 import { getLastReadPage } from "../utils/storage";
 import { colors, spacing } from "../utils/theme";
@@ -43,7 +43,7 @@ export default function HomeScreen() {
   }, [jumpValue]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeScreen>
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
@@ -123,17 +123,14 @@ export default function HomeScreen() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </SafeScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   container: {
     padding: spacing.lg,
+    backgroundColor: colors.background,
   },
   header: {
     marginBottom: spacing.lg,

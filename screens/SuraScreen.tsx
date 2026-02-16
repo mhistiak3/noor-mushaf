@@ -1,12 +1,13 @@
 import { router } from "expo-router";
-import { FlatList, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import ListItem from "../components/ListItem";
+import SafeScreen from "../components/SafeScreen";
 import { suraList } from "../data/suraList";
 import { colors, spacing } from "../utils/theme";
 
 export default function SuraScreen() {
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeScreen>
       <FlatList
         contentContainerStyle={styles.list}
         data={suraList}
@@ -30,15 +31,11 @@ export default function SuraScreen() {
           </View>
         )}
       />
-    </SafeAreaView>
+    </SafeScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   list: {
     padding: spacing.lg,
   },
