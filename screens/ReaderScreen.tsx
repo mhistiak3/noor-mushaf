@@ -17,6 +17,8 @@ import { colors, spacing } from "../utils/theme";
 const PAGE_ASPECT_RATIO = 0.72;
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const IMAGE_HEIGHT = Math.round(SCREEN_WIDTH / PAGE_ASPECT_RATIO);
+const PAGE_HEADER_HEIGHT = 44;
+const ITEM_HEIGHT = IMAGE_HEIGHT + PAGE_HEADER_HEIGHT + spacing.lg;
 
 export default function ReaderScreen() {
   const { startPage } = useLocalSearchParams<{ startPage?: string }>();
@@ -71,8 +73,8 @@ export default function ReaderScreen() {
 
   const getItemLayout = useCallback(
     (_: ArrayLike<QuranPage> | null | undefined, index: number) => ({
-      length: IMAGE_HEIGHT + spacing.lg,
-      offset: (IMAGE_HEIGHT + spacing.lg) * index,
+      length: ITEM_HEIGHT,
+      offset: ITEM_HEIGHT * index,
       index,
     }),
     [],

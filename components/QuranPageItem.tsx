@@ -2,6 +2,8 @@ import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import type { QuranPage } from "../data/quranPages";
 import { colors, spacing } from "../utils/theme";
 
+const PAGE_HEADER_HEIGHT = 44;
+
 type QuranPageItemProps = {
   page: QuranPage;
   isBookmarked: boolean;
@@ -48,7 +50,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: spacing.md,
-    paddingBottom: spacing.sm,
+    height: PAGE_HEADER_HEIGHT,
   },
   pageText: {
     color: colors.muted,
