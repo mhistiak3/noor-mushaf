@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { FlatList, StyleSheet, Text, View } from "react-native";
-import ListItem from "../components/ListItem";
+import DetailedListItem from "../components/DetailedListItem";
 import SafeScreen from "../components/SafeScreen";
 import { suraList } from "../data/suraList";
 import { colors, spacing } from "../utils/theme";
@@ -13,9 +13,13 @@ export default function SuraScreen() {
         data={suraList}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <ListItem
-            title={`${item.id}. ${item.name}`}
-            rightText={`Page ${item.startPage}`}
+          <DetailedListItem
+            icon="📖"
+            title={`${item.id}. ${item.name} - ${item.nameArabic}`}
+            subtitle={item.meaning}
+            info1={`${item.ayahs} Ayahs`}
+            info2={item.revelationType}
+            badge={`${item.startPage}`}
             onPress={() =>
               router.push({
                 pathname: "/reader",

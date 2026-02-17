@@ -117,7 +117,7 @@ export default function HomeScreen() {
               value={jumpValue}
               onChangeText={setJumpValue}
               placeholder="Enter page number"
-              placeholderTextColor={colors.mutedDark}
+              placeholderTextColor={colors.muted}
               keyboardType="number-pad"
               style={styles.modalInput}
               autoFocus

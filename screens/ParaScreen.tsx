@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { FlatList, StyleSheet, Text, View } from "react-native";
-import ListItem from "../components/ListItem";
+import DetailedListItem from "../components/DetailedListItem";
 import SafeScreen from "../components/SafeScreen";
 import { paraList } from "../data/paraList";
 import { colors, spacing } from "../utils/theme";
@@ -13,9 +13,12 @@ export default function ParaScreen() {
         data={paraList}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <ListItem
-            title={item.name}
-            rightText={`Page ${item.startPage}`}
+          <DetailedListItem
+            title={`${item.name} - ${item.nameArabic}`}
+            subtitle={item.surahs}
+            info1={`${item.totalAyahs} Ayahs`}
+            badge={`Page ${item.startPage}`}
+            icon="book"
             onPress={() =>
               router.push({
                 pathname: "/reader",
@@ -27,7 +30,9 @@ export default function ParaScreen() {
         ListHeaderComponent={() => (
           <View style={styles.header}>
             <Text style={styles.title}>All Para (Juz)</Text>
-            <Text style={styles.subtitle}>Select a Juz to begin reading</Text>
+            <Text style={styles.subtitle}>
+              30 divisions of the Quran for easy reading
+            </Text>
           </View>
         )}
       />

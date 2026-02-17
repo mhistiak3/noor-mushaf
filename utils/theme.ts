@@ -22,7 +22,7 @@ export const colors = {
   // Text colors
   text: "#134E4A", // Teal-900 - dark teal for text
   textSecondary: "#115E59", // Teal-800
-  muted: "#5EEAD4", // Teal-300 for subtle text
+  muted: "#26655c", // Teal-700
   mutedDark: "#2DD4BF", // Teal-400
 
   // Border colors
