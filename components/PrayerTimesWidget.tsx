@@ -13,8 +13,9 @@ type PrayerTimes = {
 
 type PrayerData = {
   hijriDate: string;
-  hijriDateShort: string;
+  gregorianDate: string;
   currentPrayer: string;
+  currentPrayerTime: string;
   nextPrayer: string;
   nextPrayerTime: string;
   timeRemaining: string;
@@ -81,7 +82,8 @@ export default function PrayerTimesWidget() {
       // Get Hijri date
       const hijri = data.data.date.hijri;
       const hijriDate = `${hijri.day} ${hijri.month.en} ${hijri.year}`;
-      const hijriDateShort = `${hijri.day} ${hijri.month.en}`;
+      const gregorian = data.data.date.gregorian;
+      const gregorianDate = `${gregorian.day} ${gregorian.month.en} ${gregorian.year}`;
 
       // Calculate current and next prayer
       const now = new Date();
@@ -112,10 +114,14 @@ export default function PrayerTimesWidget() {
         currentPrayer = "Isha";
       }
 
+      const currentPrayerTime =
+        timings[currentPrayer as keyof PrayerTimes] || timings.Isha;
+
       setPrayerData({
         hijriDate,
-        hijriDateShort,
+        gregorianDate,
         currentPrayer,
+        currentPrayerTime,
         nextPrayer,
         nextPrayerTime,
         timeRemaining: calculateTimeRemaining(nextPrayerTime),
@@ -191,12 +197,13 @@ export default function PrayerTimesWidget() {
 
   return (
     <View style={styles.container}>
-      {/* Header with Hijri Date */}
+      {/* Header with Dates */}
       <View style={styles.header}>
         <View style={styles.hijriContainer}>
           <Text style={styles.hijriIcon}>🌙</Text>
-          <Text style={styles.hijriDate}>{prayerData.hijriDateShort}</Text>
+          <Text style={styles.hijriDate}>{prayerData.hijriDate}</Text>
         </View>
+        <Text style={styles.gregorianDate}>{prayerData.gregorianDate}</Text>
       </View>
 
       {/* Main Content */}
@@ -206,6 +213,9 @@ export default function PrayerTimesWidget() {
           <Text style={styles.currentLabel}>Current</Text>
           <Text style={styles.currentPrayerName}>
             {prayerData.currentPrayer}
+          </Text>
+          <Text style={styles.currentPrayerTime}>
+            {formatTime(prayerData.currentPrayerTime)}
           </Text>
         </View>
 
@@ -275,7 +285,8 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: spacing.sm,
   },
   hijriContainer: {
@@ -294,6 +305,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
     color: colors.primary,
+  },
+  gregorianDate: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.textSecondary,
   },
   mainContent: {
     flexDirection: "row",
@@ -316,6 +332,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: colors.text,
+  },
+  currentPrayerTime: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
   },
   nextPrayerBox: {
     flex: 1.5,
@@ -350,11 +371,11 @@ const styles = StyleSheet.create({
   prayerTimeItem: {
     alignItems: "center",
     flex: 1,
+    paddingVertical: spacing.xs,
   },
   prayerTimeItemActive: {
     backgroundColor: colors.primaryLight + "30",
     borderRadius: borderRadius.sm,
-    paddingVertical: spacing.xs,
   },
   prayerTimeLabel: {
     fontSize: 10,

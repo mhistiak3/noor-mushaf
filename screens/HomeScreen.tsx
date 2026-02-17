@@ -45,7 +45,7 @@ export default function HomeScreen() {
   }, [jumpValue]);
 
   return (
-    <SafeScreen withTopInset={true}>
+    <SafeScreen withTopInset={true} backgroundColor={colors.primary}>
       <LinearGradient
         colors={[colors.primary, colors.primaryLight, colors.background]}
         locations={[0, 0.3, 1]}
@@ -55,12 +55,6 @@ export default function HomeScreen() {
           contentContainerStyle={styles.container}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.header}>
-            <Text style={styles.title}>Noor Mushaf</Text>
-            <Text style={styles.subtitle}>
-              Your peaceful companion for Quran
-            </Text>
-          </View>
           <PrayerTimesWidget />
           <SectionCard
             title="All Para"

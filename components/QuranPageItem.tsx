@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { memo } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import type { QuranPage } from "../data/quranPages";
@@ -30,11 +31,11 @@ function QuranPageItem({
           onPress={() => onToggleBookmark(page.id)}
           style={({ pressed }) => [styles.bookmark, pressed && styles.pressed]}
         >
-          <Text
-            style={[styles.bookmarkText, isBookmarked && styles.bookmarkActive]}
-          >
-            {isBookmarked ? "Bookmarked" : "Bookmark"}
-          </Text>
+          <Ionicons
+            name={isBookmarked ? "bookmark" : "bookmark-outline"}
+            size={18}
+            color={isBookmarked ? colors.text : colors.accent}
+          />
         </Pressable>
       </View>
       <Image
@@ -75,21 +76,16 @@ const styles = StyleSheet.create({
   bookmark: {
     borderWidth: 1,
     borderColor: colors.accent,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
-    borderRadius: 12,
+    borderRadius: 999,
     backgroundColor: colors.accentSoft,
+    minWidth: 32,
+    alignItems: "center",
+    justifyContent: "center",
   },
   pressed: {
     opacity: 0.85,
-  },
-  bookmarkText: {
-    color: colors.accent,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  bookmarkActive: {
-    color: colors.text,
   },
   image: {
     width: "100%",
