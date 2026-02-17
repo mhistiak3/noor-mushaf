@@ -224,8 +224,14 @@ export default function ReaderScreen() {
         animationType="slide"
         onRequestClose={() => setIsJumpOpen(false)}
       >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
+        <Pressable
+          style={styles.modalContainer}
+          onPress={() => setIsJumpOpen(false)}
+        >
+          <Pressable
+            style={styles.modalCard}
+            onPress={(e) => e.stopPropagation()}
+          >
             <Text style={styles.modalTitle}>Go to page</Text>
             <TextInput
               value={jumpValue}
@@ -271,8 +277,8 @@ export default function ReaderScreen() {
                 <Text style={styles.modalButtonText}>Go</Text>
               </Pressable>
             </View>
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
       </Modal>
       <Modal
         transparent
@@ -281,10 +287,13 @@ export default function ReaderScreen() {
         onRequestClose={() => setIsBookmarksOpen(false)}
       >
         <Pressable
-          style={styles.sheetBackdrop}
+          style={styles.sheetContainer}
           onPress={() => setIsBookmarksOpen(false)}
         >
-          <View style={styles.sheetCard}>
+          <Pressable
+            style={styles.sheetCard}
+            onPress={(e) => e.stopPropagation()}
+          >
             <Text style={styles.sheetTitle}>Bookmarks</Text>
             {bookmarks.length === 0 ? (
               <Text style={styles.sheetEmpty}>No bookmarks yet.</Text>
@@ -304,7 +313,7 @@ export default function ReaderScreen() {
                   ))}
               </View>
             )}
-          </View>
+          </Pressable>
         </Pressable>
       </Modal>
     </SafeScreen>
@@ -369,9 +378,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "500",
   },
-  modalBackdrop: {
+  modalContainer: {
     flex: 1,
-    backgroundColor: "rgba(13, 148, 136, 0.3)",
     justifyContent: "center",
     padding: spacing.lg,
   },
@@ -452,9 +460,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: colors.textSecondary,
   },
-  sheetBackdrop: {
+  sheetContainer: {
     flex: 1,
-    backgroundColor: "rgba(13, 148, 136, 0.3)",
     justifyContent: "flex-end",
   },
   sheetCard: {

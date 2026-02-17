@@ -103,8 +103,14 @@ export default function HomeScreen() {
         visible={isJumpOpen}
         onRequestClose={() => setIsJumpOpen(false)}
       >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
+        <Pressable
+          style={styles.modalContainer}
+          onPress={() => setIsJumpOpen(false)}
+        >
+          <Pressable
+            style={styles.modalCard}
+            onPress={(e) => e.stopPropagation()}
+          >
             <Text style={styles.modalTitle}>Go to page</Text>
             <Text style={styles.modalSubtitle}>Enter page number (1-610)</Text>
             <TextInput
@@ -136,8 +142,8 @@ export default function HomeScreen() {
                 <Text style={styles.modalButtonText}>Go</Text>
               </Pressable>
             </View>
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
       </Modal>
     </SafeScreen>
   );
@@ -166,9 +172,8 @@ const styles = StyleSheet.create({
     color: colors.accentSoft,
     textAlign: "center",
   },
-  modalBackdrop: {
+  modalContainer: {
     flex: 1,
-    backgroundColor: "rgba(13, 148, 136, 0.4)",
     justifyContent: "center",
     padding: spacing.lg,
   },
