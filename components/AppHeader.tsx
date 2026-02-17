@@ -5,14 +5,14 @@ import type {
 } from "@react-navigation/native-stack";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, spacing } from "../utils/theme";
+import { borderRadius, colors, shadows, spacing } from "../utils/theme";
 
 export default function AppHeader(props: NativeStackHeaderProps) {
   const { navigation, options, back } = props;
   const insets = useSafeAreaInsets();
   const title = options.title ?? "";
   const headerRightProps: NativeStackHeaderRightProps = {
-    tintColor: colors.text,
+    tintColor: colors.primary,
     canGoBack: Boolean(back),
   };
 
@@ -21,8 +21,14 @@ export default function AppHeader(props: NativeStackHeaderProps) {
       <View style={styles.row}>
         <View style={styles.left}>
           {back ? (
-            <Pressable onPress={navigation.goBack} style={styles.backButton}>
-              <Ionicons name="chevron-back" size={22} color={colors.accent} />
+            <Pressable
+              onPress={navigation.goBack}
+              style={({ pressed }) => [
+                styles.backButton,
+                pressed && styles.pressed,
+              ]}
+            >
+              <Ionicons name="chevron-back" size={24} color={colors.primary} />
             </Pressable>
           ) : null}
         </View>
@@ -41,9 +47,8 @@ export default function AppHeader(props: NativeStackHeaderProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    backgroundColor: colors.backgroundAlt,
+    ...shadows.sm,
   },
   row: {
     height: 56,
@@ -64,12 +69,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   backButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 4,
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.background,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pressed: {
+    opacity: 0.7,
   },
   title: {
     color: colors.text,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "700",
   },
 });

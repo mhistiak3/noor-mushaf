@@ -57,26 +57,27 @@ const styles = StyleSheet.create({
   list: {
     padding: spacing.lg,
     paddingBottom: spacing.xl,
+    backgroundColor: colors.background,
   },
   header: {
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "700",
     color: colors.text,
   },
   subtitle: {
     marginTop: spacing.xs,
     fontSize: 14,
-    color: colors.muted,
+    color: colors.textSecondary,
   },
   empty: {
-    paddingVertical: spacing.xl,
+    paddingVertical: spacing.xxl,
     alignItems: "center",
   },
   emptyText: {
-    color: colors.muted,
-    fontSize: 14,
+    color: colors.textSecondary,
+    fontSize: 15,
   },
 });

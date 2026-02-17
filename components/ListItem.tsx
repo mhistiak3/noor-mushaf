@@ -1,5 +1,5 @@
-import { Pressable, StyleSheet, Text } from "react-native";
-import { colors, spacing } from "../utils/theme";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { borderRadius, colors, shadows, spacing } from "../utils/theme";
 
 type ListItemProps = {
   title: string;
@@ -14,7 +14,11 @@ export default function ListItem({ title, rightText, onPress }: ListItemProps) {
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
       <Text style={styles.title}>{title}</Text>
-      {rightText ? <Text style={styles.rightText}>{rightText}</Text> : null}
+      {rightText ? (
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{rightText}</Text>
+        </View>
+      ) : null}
     </Pressable>
   );
 }
@@ -25,23 +29,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: "#ffffff",
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.card,
     marginBottom: spacing.sm,
+    ...shadows.sm,
   },
   pressed: {
-    opacity: 0.85,
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
   title: {
     color: colors.text,
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: "600",
+    flex: 1,
   },
-  rightText: {
-    color: colors.muted,
-    fontSize: 14,
+  badge: {
+    backgroundColor: colors.accentSoft,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    borderRadius: borderRadius.sm,
+    marginLeft: spacing.md,
+  },
+  badgeText: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: "600",
   },
 });

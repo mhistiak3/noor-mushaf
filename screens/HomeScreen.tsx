@@ -1,3 +1,4 @@
+import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -12,7 +13,7 @@ import {
 import SafeScreen from "../components/SafeScreen";
 import SectionCard from "../components/SectionCard";
 import { getLastReadPage } from "../utils/storage";
-import { colors, spacing } from "../utils/theme";
+import { borderRadius, colors, shadows, spacing } from "../utils/theme";
 
 export default function HomeScreen() {
   const [lastReadPage, setLastReadPage] = useState<number>(1);
@@ -43,48 +44,61 @@ export default function HomeScreen() {
   }, [jumpValue]);
 
   return (
-    <SafeScreen>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
+    <SafeScreen withTopInset={true}>
+      <LinearGradient
+        colors={[colors.primary, colors.primaryLight, colors.background]}
+        locations={[0, 0.3, 1]}
+        style={styles.gradient}
       >
-        <View style={styles.header}>
-          <Text style={styles.title}>Noor Mushaf</Text>
-          <Text style={styles.subtitle}>Hafezi Quran Reading</Text>
-        </View>
-        <SectionCard
-          title="All Para"
-          subtitle="Browse 30 Juz"
-          onPress={() => router.push("/para")}
-        />
-        <SectionCard
-          title="All Sura"
-          subtitle="Browse 114 Suras"
-          onPress={() => router.push("/sura")}
-        />
-        <SectionCard
-          title="Bookmarks"
-          subtitle="Saved pages"
-          onPress={() => router.push("/bookmarks")}
-        />
-        <SectionCard
-          title="Last Read"
-          subtitle={`Continue from page ${lastReadPage}`}
-          onPress={() =>
-            router.push({
-              pathname: "/reader",
-              params: { startPage: lastReadPage },
-            })
-          }
-        />
-        <SectionCard
-          title="Go to Page"
-          subtitle="Open any page by number"
-          onPress={() => setIsJumpOpen(true)}
-        />
-      </ScrollView>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.header}>
+            <Text style={styles.title}>Noor Mushaf</Text>
+            <Text style={styles.subtitle}>
+              Your peaceful companion for Quran
+            </Text>
+          </View>
+          <SectionCard
+            title="All Para"
+            subtitle="Browse 30 Juz"
+            icon="book-outline"
+            onPress={() => router.push("/para")}
+          />
+          <SectionCard
+            title="All Sura"
+            subtitle="Browse 114 Suras"
+            icon="list-outline"
+            onPress={() => router.push("/sura")}
+          />
+          <SectionCard
+            title="Bookmarks"
+            subtitle="Saved pages"
+            icon="bookmark-outline"
+            onPress={() => router.push("/bookmarks")}
+          />
+          <SectionCard
+            title="Last Read"
+            subtitle={`Continue from page ${lastReadPage}`}
+            icon="time-outline"
+            onPress={() =>
+              router.push({
+                pathname: "/reader",
+                params: { startPage: lastReadPage },
+              })
+            }
+          />
+          <SectionCard
+            title="Go to Page"
+            subtitle="Open any page by number"
+            icon="arrow-forward-circle-outline"
+            onPress={() => setIsJumpOpen(true)}
+          />
+        </ScrollView>
+      </LinearGradient>
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent
         visible={isJumpOpen}
         onRequestClose={() => setIsJumpOpen(false)}
@@ -92,13 +106,15 @@ export default function HomeScreen() {
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Go to page</Text>
+            <Text style={styles.modalSubtitle}>Enter page number (1-610)</Text>
             <TextInput
               value={jumpValue}
               onChangeText={setJumpValue}
               placeholder="Enter page number"
-              placeholderTextColor={colors.muted}
+              placeholderTextColor={colors.mutedDark}
               keyboardType="number-pad"
               style={styles.modalInput}
+              autoFocus
             />
             <View style={styles.modalActions}>
               <Pressable
@@ -128,50 +144,60 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
   container: {
     padding: spacing.lg,
-    backgroundColor: colors.background,
+    paddingTop: spacing.xl,
   },
   header: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xl,
+    alignItems: "center",
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "700",
-    color: colors.text,
+    color: colors.backgroundAlt,
+    marginBottom: spacing.sm,
   },
   subtitle: {
-    marginTop: spacing.xs,
     fontSize: 15,
-    color: colors.muted,
+    color: colors.accentSoft,
+    textAlign: "center",
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.35)",
+    backgroundColor: "rgba(13, 148, 136, 0.4)",
     justifyContent: "center",
     padding: spacing.lg,
   },
   modalCard: {
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.lg,
-    backgroundColor: colors.background,
+    borderRadius: borderRadius.xl,
+    padding: spacing.xl,
+    backgroundColor: colors.backgroundAlt,
+    ...shadows.lg,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "700",
     color: colors.text,
+    marginBottom: spacing.xs,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: colors.muted,
+    marginBottom: spacing.md,
   },
   modalInput: {
-    marginTop: spacing.md,
-    borderWidth: 1,
-    borderRadius: 12,
+    borderWidth: 2,
+    borderRadius: borderRadius.md,
     borderColor: colors.border,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md,
     fontSize: 16,
     color: colors.text,
+    backgroundColor: colors.background,
   },
   modalActions: {
     flexDirection: "row",
@@ -180,29 +206,27 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   modalButton: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.background,
   },
   modalButtonPrimary: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.accent,
-    backgroundColor: colors.accentSoft,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    ...shadows.sm,
   },
   modalButtonText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "600",
-    color: colors.accent,
+    color: colors.backgroundAlt,
   },
   modalButtonTextMuted: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "600",
-    color: colors.muted,
+    color: colors.textSecondary,
   },
   pressed: {
     opacity: 0.85,

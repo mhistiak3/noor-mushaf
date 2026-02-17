@@ -26,8 +26,8 @@ export default function ParaScreen() {
         )}
         ListHeaderComponent={() => (
           <View style={styles.header}>
-            <Text style={styles.title}>All Para</Text>
-            <Text style={styles.subtitle}>Select a Juz to begin</Text>
+            <Text style={styles.title}>All Para (Juz)</Text>
+            <Text style={styles.subtitle}>Select a Juz to begin reading</Text>
           </View>
         )}
       />
@@ -38,18 +38,19 @@ export default function ParaScreen() {
 const styles = StyleSheet.create({
   list: {
     padding: spacing.lg,
+    backgroundColor: colors.background,
   },
   header: {
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "700",
     color: colors.text,
   },
   subtitle: {
     marginTop: spacing.xs,
     fontSize: 14,
-    color: colors.muted,
+    color: colors.textSecondary,
   },
 });

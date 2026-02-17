@@ -16,7 +16,7 @@ import QuranPageItem from "../components/QuranPageItem";
 import SafeScreen from "../components/SafeScreen";
 import { QuranPage, quranPages } from "../data/quranPages";
 import { getBookmarks, setBookmarks, setLastReadPage } from "../utils/storage";
-import { colors, spacing } from "../utils/theme";
+import { borderRadius, colors, shadows, spacing } from "../utils/theme";
 
 const PAGE_ASPECT_RATIO = 0.72;
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -125,7 +125,7 @@ export default function ReaderScreen() {
         isBookmarked={bookmarksSet.has(item.id)}
         onToggleBookmark={handleToggleBookmark}
         imageHeight={IMAGE_HEIGHT}
-        imageBackground={isNight ? "#f2e6d0" : "#ffffff"}
+        imageBackground={isNight ? colors.sepia : colors.backgroundAlt}
         imageOpacity={isNight ? 0.96 : 1}
       />
     ),
@@ -133,19 +133,22 @@ export default function ReaderScreen() {
   );
 
   return (
-    <SafeScreen>
+    <SafeScreen backgroundColor="#FFFFFF">
       <Stack.Screen
         options={{
           title: "Quran Reader",
           headerRight: () => (
             <Pressable
               onPress={() => setIsMenuOpen(true)}
-              style={styles.menuButton}
+              style={({ pressed }) => [
+                styles.menuButton,
+                pressed && styles.pressed,
+              ]}
             >
               <Ionicons
                 name="ellipsis-vertical"
-                size={18}
-                color={colors.text}
+                size={20}
+                color={colors.primary}
               />
             </Pressable>
           ),
@@ -312,184 +315,183 @@ const styles = StyleSheet.create({
   list: {
     paddingTop: spacing.md,
     paddingBottom: spacing.xl,
+    backgroundColor: "#FFFFFF",
   },
   listNight: {
-    backgroundColor: "#f5eedc",
+    backgroundColor: colors.sepia,
   },
   footer: {
     alignItems: "center",
     paddingVertical: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    backgroundColor: colors.background,
+    backgroundColor: "#FFFFFF",
+    ...shadows.sm,
   },
   footerNight: {
-    backgroundColor: "#f5eedc",
-    borderTopColor: "#e2d4bf",
+    backgroundColor: colors.sepia,
   },
   footerText: {
     fontSize: 12,
-    color: colors.muted,
+    color: colors.textSecondary,
+    fontWeight: "500",
   },
   menuButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 6,
+    width: 36,
+    height: 36,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.background,
+    alignItems: "center",
+    justifyContent: "center",
   },
   menuBackdrop: {
     flex: 1,
     justifyContent: "flex-start",
     alignItems: "flex-end",
-    paddingTop: 8,
+    paddingTop: 60,
     paddingRight: spacing.md,
   },
   menuSheet: {
-    backgroundColor: colors.background,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.md,
     paddingVertical: spacing.sm,
-    width: 180,
+    width: 200,
     marginTop: 4,
+    ...shadows.lg,
   },
   menuRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
     gap: spacing.sm,
   },
   menuText: {
     color: colors.text,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "500",
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.35)",
+    backgroundColor: "rgba(13, 148, 136, 0.3)",
     justifyContent: "center",
     padding: spacing.lg,
   },
   modalCard: {
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.lg,
-    backgroundColor: colors.background,
+    borderRadius: borderRadius.xl,
+    padding: spacing.xl,
+    backgroundColor: colors.backgroundAlt,
+    ...shadows.lg,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "700",
     color: colors.text,
+    marginBottom: spacing.sm,
   },
   modalInput: {
-    marginTop: spacing.md,
-    borderWidth: 1,
-    borderRadius: 12,
+    marginTop: spacing.sm,
+    borderWidth: 2,
+    borderRadius: borderRadius.md,
     borderColor: colors.border,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md,
     fontSize: 16,
     color: colors.text,
+    backgroundColor: colors.background,
   },
   recentRow: {
-    marginTop: spacing.md,
+    marginTop: spacing.lg,
   },
   recentLabel: {
-    color: colors.muted,
-    fontSize: 12,
-    marginBottom: spacing.xs,
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontWeight: "600",
+    marginBottom: spacing.sm,
   },
   recentList: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
   recentChip: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    backgroundColor: colors.card,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.accentSoft,
   },
   recentChipText: {
-    color: colors.text,
-    fontSize: 12,
-    fontWeight: "500",
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: "600",
   },
   modalActions: {
     flexDirection: "row",
     justifyContent: "flex-end",
     gap: spacing.sm,
-    marginTop: spacing.lg,
+    marginTop: spacing.xl,
   },
   modalButton: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.background,
   },
   modalButtonPrimary: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.accent,
-    backgroundColor: colors.accentSoft,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.primary,
+    ...shadows.sm,
   },
   modalButtonText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "600",
-    color: colors.accent,
+    color: colors.backgroundAlt,
   },
   modalButtonTextMuted: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "600",
-    color: colors.muted,
+    color: colors.textSecondary,
   },
   sheetBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    backgroundColor: "rgba(13, 148, 136, 0.3)",
     justifyContent: "flex-end",
   },
   sheetCard: {
-    backgroundColor: colors.background,
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.lg,
+    backgroundColor: colors.backgroundAlt,
+    borderTopLeftRadius: borderRadius.xxl,
+    borderTopRightRadius: borderRadius.xxl,
+    padding: spacing.xl,
     maxHeight: "60%",
+    ...shadows.lg,
   },
   sheetTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "700",
     color: colors.text,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.lg,
   },
   sheetEmpty: {
-    color: colors.muted,
-    fontSize: 14,
-    paddingVertical: spacing.sm,
+    color: colors.textSecondary,
+    fontSize: 15,
+    paddingVertical: spacing.lg,
+    textAlign: "center",
   },
   sheetList: {
     gap: spacing.sm,
   },
   sheetRow: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.card,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    backgroundColor: colors.accentSoft,
   },
   sheetRowText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "600",
-    color: colors.text,
+    color: colors.primary,
   },
   pressed: {
-    opacity: 0.85,
+    opacity: 0.8,
   },
 });

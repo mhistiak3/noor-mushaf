@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     height: PAGE_HEADER_HEIGHT,
   },
   pageText: {
-    color: colors.muted,
+    color: colors.primary,
     fontSize: 13,
     letterSpacing: 0.5,
     textTransform: "uppercase",
