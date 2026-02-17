@@ -12,7 +12,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.istiakahsorganization.noormushaf",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "We need your location to show accurate prayer times for your area."
       }
     },
     "android": {
@@ -24,7 +25,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.istiakahsorganization.noormushaf"
+      "package": "com.istiakahsorganization.noormushaf",
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
     },
     "web": {
       "output": "static",

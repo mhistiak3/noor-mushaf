@@ -10,6 +10,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import PrayerTimesWidget from "../components/PrayerTimesWidget";
 import SafeScreen from "../components/SafeScreen";
 import SectionCard from "../components/SectionCard";
 import { getLastReadPage } from "../utils/storage";
@@ -60,6 +61,7 @@ export default function HomeScreen() {
               Your peaceful companion for Quran
             </Text>
           </View>
+          <PrayerTimesWidget />
           <SectionCard
             title="All Para"
             subtitle="Browse 30 Juz"
