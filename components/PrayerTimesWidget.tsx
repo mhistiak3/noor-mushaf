@@ -57,31 +57,57 @@ export default function PrayerTimesWidget() {
       const now = new Date();
       const currentTime = now.getHours() * 60 + now.getMinutes();
 
-      let currentPrayer = "";
-      let nextPrayer = "";
-      let nextPrayerTime = "";
+      // Define prayer ranges with their end times
+      const prayerRanges = [
+        { name: "Fajr", start: timings.Fajr, end: timings.Dhuhr },
+        { name: "Dhuhr", start: timings.Dhuhr, end: timings.Asr },
+        { name: "Asr", start: timings.Asr, end: timings.Maghrib },
+        { name: "Maghrib", start: timings.Maghrib, end: timings.Isha },
+        { name: "Isha", start: timings.Isha, end: timings.Fajr }, // crosses midnight
+      ];
 
-      for (let i = 0; i < PRAYER_NAMES.length; i++) {
-        const prayerName = PRAYER_NAMES[i];
-        const [hours, minutes] = timings[prayerName].split(":").map(Number);
-        const prayerTime = hours * 60 + minutes;
+      const toMinutes = (time: string): number => {
+        const [h, m] = time.split(":").map(Number);
+        return h * 60 + m;
+      };
 
-        if (currentTime < prayerTime) {
-          nextPrayer = prayerName;
-          nextPrayerTime = timings[prayerName];
-          currentPrayer = i > 0 ? PRAYER_NAMES[i - 1] : "Isha";
-          break;
+      let currentPrayer = "Isha";
+      let nextPrayer = "Fajr";
+      const startMin = currentTime;
+
+      // Find current prayer by checking which range current time falls into
+      for (const range of prayerRanges) {
+        const startMin = toMinutes(range.start);
+        const endMin = toMinutes(range.end);
+
+        if (startMin <= endMin) {
+          // Normal range (doesn't cross midnight)
+          if (currentTime >= startMin && currentTime < endMin) {
+            currentPrayer = range.name;
+            // Find next prayer
+            const currentIndex = PRAYER_NAMES.indexOf(
+              range.name as keyof PrayerTimings,
+            );
+            nextPrayer =
+              currentIndex < PRAYER_NAMES.length - 1
+                ? PRAYER_NAMES[currentIndex + 1]
+                : "Fajr";
+            break;
+          }
+        } else {
+          // Range crosses midnight (Isha to Fajr)
+          if (currentTime >= startMin || currentTime < endMin) {
+            currentPrayer = range.name;
+            nextPrayer = "Fajr";
+            break;
+          }
         }
-      }
-
-      if (!nextPrayer) {
-        nextPrayer = "Fajr";
-        nextPrayerTime = timings.Fajr;
-        currentPrayer = "Isha";
       }
 
       const currentPrayerTime =
         timings[currentPrayer as keyof PrayerTimings] || timings.Isha;
+      const nextPrayerTime =
+        timings[nextPrayer as keyof PrayerTimings] || timings.Fajr;
 
       return {
         hijriDate,
