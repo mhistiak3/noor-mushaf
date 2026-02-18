@@ -3,10 +3,13 @@ import { useCallback, useEffect, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import ListItem from "../components/ListItem";
 import SafeScreen from "../components/SafeScreen";
+import { useAppContext } from "../contexts/AppContext";
+import { getTranslation } from "../utils/languages";
 import { getBookmarks } from "../utils/storage";
-import { colors, spacing } from "../utils/theme";
+import { spacing } from "../utils/theme";
 
 export default function BookmarkScreen() {
+  const { themeColors, currentLanguage } = useAppContext();
   const [bookmarks, setBookmarks] = useState<number[]>([]);
 
   const loadBookmarks = useCallback(() => {
@@ -26,7 +29,10 @@ export default function BookmarkScreen() {
   return (
     <SafeScreen>
       <FlatList
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[
+          styles.list,
+          { backgroundColor: themeColors.background, height: "100%" },
+        ]}
         data={bookmarks}
         keyExtractor={(item) => String(item)}
         renderItem={({ item }) => (
@@ -39,13 +45,23 @@ export default function BookmarkScreen() {
         )}
         ListHeaderComponent={() => (
           <View style={styles.header}>
-            <Text style={styles.title}>Bookmarks</Text>
-            <Text style={styles.subtitle}>Saved pages for quick access</Text>
+            <Text style={[styles.title, { color: themeColors.text }]}>
+              {getTranslation("bookmarks", currentLanguage)}
+            </Text>
+            <Text
+              style={[styles.subtitle, { color: themeColors.textSecondary }]}
+            >
+              {getTranslation("savedPages", currentLanguage)}
+            </Text>
           </View>
         )}
         ListEmptyComponent={() => (
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>No bookmarks yet.</Text>
+            <Text
+              style={[styles.emptyText, { color: themeColors.textSecondary }]}
+            >
+              {getTranslation("noBookmarks", currentLanguage)}
+            </Text>
           </View>
         )}
       />
@@ -57,7 +73,6 @@ const styles = StyleSheet.create({
   list: {
     padding: spacing.lg,
     paddingBottom: spacing.xl,
-    backgroundColor: colors.background,
   },
   header: {
     marginBottom: spacing.lg,
@@ -65,19 +80,16 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "700",
-    color: colors.text,
   },
   subtitle: {
     marginTop: spacing.xs,
     fontSize: 14,
-    color: colors.textSecondary,
   },
   empty: {
     paddingVertical: spacing.xxl,
     alignItems: "center",
   },
   emptyText: {
-    color: colors.textSecondary,
     fontSize: 15,
   },
 });

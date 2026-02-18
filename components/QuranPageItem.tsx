@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { memo } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { useAppContext } from "../contexts/AppContext";
 import type { QuranPage } from "../data/quranPages";
-import { colors, spacing } from "../utils/theme";
+import { spacing } from "../utils/theme";
 
 const PAGE_HEADER_HEIGHT = 44;
 
@@ -23,18 +24,29 @@ function QuranPageItem({
   imageBackground,
   imageOpacity,
 }: QuranPageItemProps) {
+  const { themeColors } = useAppContext();
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.pageText}>Page {page.id}</Text>
+        <Text style={[styles.pageText, { color: themeColors.text }]}>
+          Page {page.id}
+        </Text>
         <Pressable
           onPress={() => onToggleBookmark(page.id)}
-          style={({ pressed }) => [styles.bookmark, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.bookmark,
+            { borderColor: themeColors.textSecondary },
+            pressed && styles.pressed,
+          ]}
         >
           <Ionicons
             name={isBookmarked ? "bookmark" : "bookmark-outline"}
             size={18}
-            color={isBookmarked ? colors.text : colors.accent}
+            color={
+              isBookmarked
+                ? themeColors.textSecondary
+                : themeColors.textSecondary
+            }
           />
         </Pressable>
       </View>
@@ -68,18 +80,15 @@ const styles = StyleSheet.create({
     height: PAGE_HEADER_HEIGHT,
   },
   pageText: {
-    color: colors.primary,
     fontSize: 13,
     letterSpacing: 0.5,
     textTransform: "uppercase",
   },
   bookmark: {
     borderWidth: 1,
-    borderColor: colors.accent,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: 999,
-    backgroundColor: colors.accentSoft,
     minWidth: 32,
     alignItems: "center",
     justifyContent: "center",

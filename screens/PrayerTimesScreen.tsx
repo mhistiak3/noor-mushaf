@@ -8,12 +8,14 @@ import {
   View,
 } from "react-native";
 import SafeScreen from "../components/SafeScreen";
+import { useAppContext } from "../contexts/AppContext";
+import { getTranslation } from "../utils/languages";
 import {
   getPrayerTimesCache,
   setPrayerTimesCache,
   type PrayerTimings,
 } from "../utils/storage";
-import { borderRadius, colors, shadows, spacing } from "../utils/theme";
+import { borderRadius, shadows, spacing } from "../utils/theme";
 
 type PrayerData = {
   hijriDate: string;
@@ -30,6 +32,7 @@ type DetailRow = {
 };
 
 export default function PrayerTimesScreen() {
+  const { themeColors, currentLanguage } = useAppContext();
   const [prayerData, setPrayerData] = useState<PrayerData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -218,7 +221,7 @@ export default function PrayerTimesScreen() {
     return (
       <SafeScreen>
         <View style={styles.center}>
-          <ActivityIndicator size="small" color={colors.primary} />
+          <ActivityIndicator size="small" color={themeColors.primary} />
         </View>
       </SafeScreen>
     );
@@ -228,7 +231,11 @@ export default function PrayerTimesScreen() {
     return (
       <SafeScreen>
         <View style={styles.center}>
-          <Text style={styles.errorText}>{error || "Unable to load"}</Text>
+          <Text
+            style={[styles.errorText, { color: themeColors.textSecondary }]}
+          >
+            {error || "Unable to load"}
+          </Text>
         </View>
       </SafeScreen>
     );
@@ -236,17 +243,35 @@ export default function PrayerTimesScreen() {
 
   return (
     <SafeScreen>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          { backgroundColor: themeColors.background },
+        ]}
+      >
         <View style={styles.header}>
-          <View style={styles.hijriContainer}>
+          <View
+            style={[
+              styles.hijriContainer,
+              { backgroundColor: themeColors.primaryLight + "30" },
+            ]}
+          >
             <Text style={styles.hijriIcon}>🌙</Text>
-            <Text style={styles.hijriDate}>{prayerData.hijriDate}</Text>
+            <Text style={[styles.hijriDate, { color: themeColors.primary }]}>
+              {prayerData.hijriDate}
+            </Text>
           </View>
-          <Text style={styles.gregorianDate}>{prayerData.gregorianDate}</Text>
+          <Text
+            style={[styles.gregorianDate, { color: themeColors.textSecondary }]}
+          >
+            {prayerData.gregorianDate}
+          </Text>
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Farz Salat</Text>
+        <View style={[styles.card, { backgroundColor: themeColors.card }]}>
+          <Text style={[styles.cardTitle, { color: themeColors.text }]}>
+            {getTranslation("farzSalat", currentLanguage)}
+          </Text>
           {prayerData &&
             farzRows.map((row) => {
               const isCurrent = row.key === currentKey;
@@ -258,13 +283,25 @@ export default function PrayerTimesScreen() {
               return (
                 <View
                   key={row.label}
-                  style={[styles.row, isCurrent && styles.rowActive]}
+                  style={[
+                    styles.row,
+                    { borderBottomColor: themeColors.border },
+                    isCurrent && [
+                      styles.rowActive,
+                      { backgroundColor: themeColors.primaryLight + "25" },
+                    ],
+                  ]}
                 >
                   <View style={styles.rowLeft}>
                     <Text style={styles.rowIcon}>{row.icon}</Text>
                     <Text
                       style={[
                         styles.rowLabel,
+                        {
+                          color: isCurrent
+                            ? themeColors.primary
+                            : themeColors.textSecondary,
+                        },
                         isCurrent && styles.rowLabelActive,
                       ]}
                     >
@@ -275,13 +312,23 @@ export default function PrayerTimesScreen() {
                     <Text
                       style={[
                         styles.rowTime,
+                        {
+                          color: isCurrent
+                            ? themeColors.primary
+                            : themeColors.text,
+                        },
                         isCurrent && styles.rowTimeActive,
                       ]}
                     >
                       {formatTime(startTime)}
                     </Text>
                     {row.showRange && endTime && (
-                      <Text style={styles.rowRange}>
+                      <Text
+                        style={[
+                          styles.rowRange,
+                          { color: themeColors.textSecondary },
+                        ]}
+                      >
                         to {formatTime(endTime)}
                       </Text>
                     )}
@@ -291,20 +338,37 @@ export default function PrayerTimesScreen() {
             })}
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Other Times</Text>
+        <View style={[styles.card, { backgroundColor: themeColors.card }]}>
+          <Text style={[styles.cardTitle, { color: themeColors.text }]}>
+            {getTranslation("otherTimes", currentLanguage)}
+          </Text>
           {prayerData &&
             otherRows.map((row) => {
               const time = prayerData.timings[row.key];
 
               return (
-                <View key={row.label} style={styles.row}>
+                <View
+                  key={row.label}
+                  style={[
+                    styles.row,
+                    { borderBottomColor: themeColors.border },
+                  ]}
+                >
                   <View style={styles.rowLeft}>
                     <Text style={styles.rowIcon}>{row.icon}</Text>
-                    <Text style={styles.rowLabel}>{row.label}</Text>
+                    <Text
+                      style={[
+                        styles.rowLabel,
+                        { color: themeColors.textSecondary },
+                      ]}
+                    >
+                      {row.label}
+                    </Text>
                   </View>
                   <View style={styles.rowRight}>
-                    <Text style={styles.rowTime}>{formatTime(time)}</Text>
+                    <Text style={[styles.rowTime, { color: themeColors.text }]}>
+                      {formatTime(time)}
+                    </Text>
                   </View>
                 </View>
               );
@@ -345,7 +409,6 @@ const styles = StyleSheet.create({
   hijriContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.primaryLight + "30",
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: borderRadius.full,
@@ -357,15 +420,12 @@ const styles = StyleSheet.create({
   hijriDate: {
     fontSize: 13,
     fontWeight: "600",
-    color: colors.primary,
   },
   gregorianDate: {
     fontSize: 12,
     fontWeight: "600",
-    color: colors.textSecondary,
   },
   card: {
-    backgroundColor: colors.card,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginBottom: spacing.md,
@@ -374,7 +434,6 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: colors.text,
     marginBottom: spacing.md,
   },
   row: {
@@ -383,11 +442,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
     paddingHorizontal: spacing.sm,
   },
   rowActive: {
-    backgroundColor: colors.primaryLight + "25",
     // borderRadius: borderRadius.md,
   },
   rowLeft: {
@@ -400,10 +457,8 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontSize: 13,
-    color: colors.textSecondary,
   },
   rowLabelActive: {
-    color: colors.primary,
     fontWeight: "700",
   },
   rowRight: {
@@ -412,18 +467,13 @@ const styles = StyleSheet.create({
   rowTime: {
     fontSize: 14,
     fontWeight: "600",
-    color: colors.text,
   },
-  rowTimeActive: {
-    color: colors.primary,
-  },
+  rowTimeActive: {},
   rowRange: {
     fontSize: 11,
-    color: colors.textSecondary,
     marginTop: 2,
   },
   errorText: {
     fontSize: 13,
-    color: colors.textSecondary,
   },
 });

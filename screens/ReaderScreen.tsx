@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
@@ -14,9 +14,11 @@ import {
 } from "react-native";
 import QuranPageItem from "../components/QuranPageItem";
 import SafeScreen from "../components/SafeScreen";
+import { useAppContext } from "../contexts/AppContext";
 import { QuranPage, quranPages } from "../data/quranPages";
+import { getTranslation } from "../utils/languages";
 import { getBookmarks, setBookmarks, setLastReadPage } from "../utils/storage";
-import { borderRadius, colors, shadows, spacing } from "../utils/theme";
+import { borderRadius, shadows, spacing } from "../utils/theme";
 
 const PAGE_ASPECT_RATIO = 0.72;
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -26,10 +28,10 @@ const ITEM_HEIGHT = IMAGE_HEIGHT + PAGE_HEADER_HEIGHT + spacing.lg;
 
 export default function ReaderScreen() {
   const { startPage } = useLocalSearchParams<{ startPage?: string }>();
+  const { themeColors, currentLanguage } = useAppContext();
   const listRef = useRef<FlatList<QuranPage>>(null);
   const [bookmarks, setBookmarkState] = useState<number[]>([]);
   const bookmarksSet = useMemo(() => new Set(bookmarks), [bookmarks]);
-  const [isNight, setIsNight] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isJumpOpen, setIsJumpOpen] = useState(false);
   const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
@@ -125,11 +127,10 @@ export default function ReaderScreen() {
         isBookmarked={bookmarksSet.has(item.id)}
         onToggleBookmark={handleToggleBookmark}
         imageHeight={IMAGE_HEIGHT}
-        imageBackground={isNight ? colors.sepia : colors.backgroundAlt}
-        imageOpacity={isNight ? 0.96 : 1}
+        imageBackground={themeColors.background}
       />
     ),
-    [bookmarksSet, handleToggleBookmark, isNight],
+    [bookmarksSet, handleToggleBookmark, themeColors],
   );
 
   return (
@@ -142,13 +143,14 @@ export default function ReaderScreen() {
               onPress={() => setIsMenuOpen(true)}
               style={({ pressed }) => [
                 styles.menuButton,
+                { backgroundColor: themeColors.background },
                 pressed && styles.pressed,
               ]}
             >
               <Ionicons
                 name="ellipsis-vertical"
                 size={20}
-                color={colors.primary}
+                color={themeColors.text}
               />
             </Pressable>
           ),
@@ -159,7 +161,10 @@ export default function ReaderScreen() {
         data={quranPages}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
-        contentContainerStyle={[styles.list, isNight && styles.listNight]}
+        contentContainerStyle={[
+          styles.list,
+          { backgroundColor: themeColors.background },
+        ]}
         initialScrollIndex={initialIndex}
         initialNumToRender={3}
         windowSize={5}
@@ -171,9 +176,13 @@ export default function ReaderScreen() {
           listRef.current?.scrollToIndex({ index, animated: false });
         }}
       />
-      <View style={[styles.footer, isNight && styles.footerNight]}>
-        <Text style={styles.footerText}>Continuous Mushaf View</Text>
-      </View>
+      {/* <View
+        style={[styles.footer, { backgroundColor: themeColors.background }]}
+      >
+        <Text style={[styles.footerText, { color: themeColors.textSecondary }]}>
+          Continuous Mushaf View
+        </Text>
+      </View> */}
       <Modal
         transparent
         visible={isMenuOpen}
@@ -184,16 +193,20 @@ export default function ReaderScreen() {
           style={styles.menuBackdrop}
           onPress={() => setIsMenuOpen(false)}
         >
-          <View style={styles.menuSheet}>
+          <View
+            style={[styles.menuSheet, { backgroundColor: themeColors.card }]}
+          >
             <Pressable
               onPress={() => {
                 setIsMenuOpen(false);
-                setIsNight((value) => !value);
+                router.push("/settings");
               }}
               style={styles.menuRow}
             >
-              <Ionicons name="moon" size={16} color={colors.text} />
-              <Text style={styles.menuText}>Night reading</Text>
+              <Ionicons name="settings" size={16} color={themeColors.text} />
+              <Text style={[styles.menuText, { color: themeColors.text }]}>
+                {getTranslation("settings", currentLanguage)}
+              </Text>
             </Pressable>
             <Pressable
               onPress={() => {
@@ -202,8 +215,10 @@ export default function ReaderScreen() {
               }}
               style={styles.menuRow}
             >
-              <Ionicons name="search" size={16} color={colors.text} />
-              <Text style={styles.menuText}>Go to page</Text>
+              <Ionicons name="search" size={16} color={themeColors.text} />
+              <Text style={[styles.menuText, { color: themeColors.text }]}>
+                {getTranslation("jumpToPage", currentLanguage)}
+              </Text>
             </Pressable>
             <Pressable
               onPress={() => {
@@ -212,8 +227,10 @@ export default function ReaderScreen() {
               }}
               style={styles.menuRow}
             >
-              <Ionicons name="bookmark" size={16} color={colors.text} />
-              <Text style={styles.menuText}>Bookmarks</Text>
+              <Ionicons name="bookmark" size={16} color={themeColors.text} />
+              <Text style={[styles.menuText, { color: themeColors.text }]}>
+                {getTranslation("bookmarks", currentLanguage)}
+              </Text>
             </Pressable>
           </View>
         </Pressable>
@@ -229,29 +246,55 @@ export default function ReaderScreen() {
           onPress={() => setIsJumpOpen(false)}
         >
           <Pressable
-            style={styles.modalCard}
+            style={[styles.modalCard, { backgroundColor: themeColors.card }]}
             onPress={(e) => e.stopPropagation()}
           >
-            <Text style={styles.modalTitle}>Go to page</Text>
+            <Text style={[styles.modalTitle, { color: themeColors.text }]}>
+              {getTranslation("jumpToPage", currentLanguage)}
+            </Text>
             <TextInput
               value={jumpValue}
               onChangeText={setJumpValue}
               placeholder="Enter page number"
-              placeholderTextColor={colors.muted}
+              placeholderTextColor={themeColors.textSecondary}
               keyboardType="number-pad"
-              style={styles.modalInput}
+              style={[
+                styles.modalInput,
+                {
+                  backgroundColor: themeColors.background,
+                  borderColor: themeColors.border,
+                  color: themeColors.text,
+                },
+              ]}
             />
             {recentPages.length > 0 ? (
               <View style={styles.recentRow}>
-                <Text style={styles.recentLabel}>Recent</Text>
+                <Text
+                  style={[
+                    styles.recentLabel,
+                    { color: themeColors.textSecondary },
+                  ]}
+                >
+                  {getTranslation("recent", currentLanguage)}
+                </Text>
                 <View style={styles.recentList}>
                   {recentPages.map((page) => (
                     <Pressable
                       key={page}
                       onPress={() => handleSelectRecent(page)}
-                      style={styles.recentChip}
+                      style={[
+                        styles.recentChip,
+                        { backgroundColor: themeColors.primaryLight },
+                      ]}
                     >
-                      <Text style={styles.recentChipText}>Page {page}</Text>
+                      <Text
+                        style={[
+                          styles.recentChipText,
+                          { color: themeColors.primary },
+                        ]}
+                      >
+                        Page {page}
+                      </Text>
                     </Pressable>
                   ))}
                 </View>
@@ -262,19 +305,30 @@ export default function ReaderScreen() {
                 onPress={() => setIsJumpOpen(false)}
                 style={({ pressed }) => [
                   styles.modalButton,
+                  { backgroundColor: themeColors.background },
                   pressed && styles.pressed,
                 ]}
               >
-                <Text style={styles.modalButtonTextMuted}>Cancel</Text>
+                <Text
+                  style={[
+                    styles.modalButtonTextMuted,
+                    { color: themeColors.textSecondary },
+                  ]}
+                >
+                  {getTranslation("cancel", currentLanguage)}
+                </Text>
               </Pressable>
               <Pressable
                 onPress={handleJump}
                 style={({ pressed }) => [
                   styles.modalButtonPrimary,
+                  { backgroundColor: themeColors.primary },
                   pressed && styles.pressed,
                 ]}
               >
-                <Text style={styles.modalButtonText}>Go</Text>
+                <Text style={[styles.modalButtonText, { color: "#FFFFFF" }]}>
+                  {getTranslation("go", currentLanguage)}
+                </Text>
               </Pressable>
             </View>
           </Pressable>
@@ -291,12 +345,21 @@ export default function ReaderScreen() {
           onPress={() => setIsBookmarksOpen(false)}
         >
           <Pressable
-            style={styles.sheetCard}
+            style={[styles.sheetCard, { backgroundColor: themeColors.card }]}
             onPress={(e) => e.stopPropagation()}
           >
-            <Text style={styles.sheetTitle}>Bookmarks</Text>
+            <Text style={[styles.sheetTitle, { color: themeColors.text }]}>
+              {getTranslation("bookmarks", currentLanguage)}
+            </Text>
             {bookmarks.length === 0 ? (
-              <Text style={styles.sheetEmpty}>No bookmarks yet.</Text>
+              <Text
+                style={[
+                  styles.sheetEmpty,
+                  { color: themeColors.textSecondary },
+                ]}
+              >
+                No bookmarks yet.
+              </Text>
             ) : (
               <View style={styles.sheetList}>
                 {bookmarks
@@ -306,9 +369,19 @@ export default function ReaderScreen() {
                     <Pressable
                       key={page}
                       onPress={() => handleSelectRecent(page)}
-                      style={styles.sheetRow}
+                      style={[
+                        styles.sheetRow,
+                        { backgroundColor: themeColors.primaryLight },
+                      ]}
                     >
-                      <Text style={styles.sheetRowText}>Page {page}</Text>
+                      <Text
+                        style={[
+                          styles.sheetRowText,
+                          { color: themeColors.primary },
+                        ]}
+                      >
+                        Page {page}
+                      </Text>
                     </Pressable>
                   ))}
               </View>
@@ -324,30 +397,22 @@ const styles = StyleSheet.create({
   list: {
     paddingTop: spacing.md,
     paddingBottom: spacing.xl,
-    backgroundColor: "#FFFFFF",
   },
-  listNight: {
-    backgroundColor: colors.sepia,
-  },
+  listNight: {},
   footer: {
     alignItems: "center",
     paddingVertical: spacing.sm,
-    backgroundColor: "#FFFFFF",
     ...shadows.sm,
   },
-  footerNight: {
-    backgroundColor: colors.sepia,
-  },
+  footerNight: {},
   footerText: {
     fontSize: 12,
-    color: colors.textSecondary,
     fontWeight: "500",
   },
   menuButton: {
     width: 36,
     height: 36,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.background,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -359,7 +424,6 @@ const styles = StyleSheet.create({
     paddingRight: spacing.md,
   },
   menuSheet: {
-    backgroundColor: colors.card,
     borderRadius: borderRadius.md,
     paddingVertical: spacing.sm,
     width: 200,
@@ -374,7 +438,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   menuText: {
-    color: colors.text,
     fontSize: 15,
     fontWeight: "500",
   },
@@ -386,31 +449,25 @@ const styles = StyleSheet.create({
   modalCard: {
     borderRadius: borderRadius.xl,
     padding: spacing.xl,
-    backgroundColor: colors.backgroundAlt,
     ...shadows.lg,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: colors.text,
     marginBottom: spacing.sm,
   },
   modalInput: {
     marginTop: spacing.sm,
     borderWidth: 2,
     borderRadius: borderRadius.md,
-    borderColor: colors.border,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     fontSize: 16,
-    color: colors.text,
-    backgroundColor: colors.background,
   },
   recentRow: {
     marginTop: spacing.lg,
   },
   recentLabel: {
-    color: colors.textSecondary,
     fontSize: 13,
     fontWeight: "600",
     marginBottom: spacing.sm,
@@ -424,10 +481,8 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: colors.accentSoft,
   },
   recentChipText: {
-    color: colors.primary,
     fontSize: 13,
     fontWeight: "600",
   },
@@ -441,31 +496,26 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    backgroundColor: colors.background,
   },
   modalButtonPrimary: {
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    backgroundColor: colors.primary,
     ...shadows.sm,
   },
   modalButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: colors.backgroundAlt,
   },
   modalButtonTextMuted: {
     fontSize: 16,
     fontWeight: "600",
-    color: colors.textSecondary,
   },
   sheetContainer: {
     flex: 1,
     justifyContent: "flex-end",
   },
   sheetCard: {
-    backgroundColor: colors.backgroundAlt,
     borderTopLeftRadius: borderRadius.xxl,
     borderTopRightRadius: borderRadius.xxl,
     padding: spacing.xl,
@@ -475,11 +525,9 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: colors.text,
     marginBottom: spacing.lg,
   },
   sheetEmpty: {
-    color: colors.textSecondary,
     fontSize: 15,
     paddingVertical: spacing.lg,
     textAlign: "center",
@@ -491,12 +539,10 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
-    backgroundColor: colors.accentSoft,
   },
   sheetRowText: {
     fontSize: 15,
     fontWeight: "600",
-    color: colors.primary,
   },
   pressed: {
     opacity: 0.8,

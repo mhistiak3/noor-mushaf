@@ -13,10 +13,13 @@ import {
 import PrayerTimesWidget from "../components/PrayerTimesWidget";
 import SafeScreen from "../components/SafeScreen";
 import SectionCard from "../components/SectionCard";
+import { useAppContext } from "../contexts/AppContext";
+import { getTranslation } from "../utils/languages";
 import { getLastReadPage } from "../utils/storage";
-import { borderRadius, colors, shadows, spacing } from "../utils/theme";
+import { borderRadius, shadows, spacing } from "../utils/theme";
 
 export default function HomeScreen() {
+  const { themeColors, currentLanguage } = useAppContext();
   const [lastReadPage, setLastReadPage] = useState<number>(1);
   const [isJumpOpen, setIsJumpOpen] = useState(false);
   const [jumpValue, setJumpValue] = useState("");
@@ -45,9 +48,13 @@ export default function HomeScreen() {
   }, [jumpValue]);
 
   return (
-    <SafeScreen withTopInset={true} backgroundColor={colors.primary}>
+    <SafeScreen withTopInset={true} backgroundColor={themeColors.primary}>
       <LinearGradient
-        colors={[colors.primary, colors.primaryLight, colors.background]}
+        colors={[
+          themeColors.primary,
+          themeColors.primaryLight,
+          themeColors.background,
+        ]}
         locations={[0, 0.3, 1]}
         style={styles.gradient}
       >
@@ -57,26 +64,26 @@ export default function HomeScreen() {
         >
           <PrayerTimesWidget />
           <SectionCard
-            title="All Para"
-            subtitle="Browse 30 Juz"
+            title={getTranslation("allPara", currentLanguage)}
+            subtitle={getTranslation("browseJuz", currentLanguage)}
             icon="book-outline"
             onPress={() => router.push("/para")}
           />
           <SectionCard
-            title="All Sura"
-            subtitle="Browse 114 Suras"
+            title={getTranslation("allSura", currentLanguage)}
+            subtitle={getTranslation("browseSuras", currentLanguage)}
             icon="list-outline"
             onPress={() => router.push("/sura")}
           />
           <SectionCard
-            title="Bookmarks"
-            subtitle="Saved pages"
+            title={getTranslation("bookmarks", currentLanguage)}
+            subtitle={getTranslation("savedPages", currentLanguage)}
             icon="bookmark-outline"
             onPress={() => router.push("/bookmarks")}
           />
           <SectionCard
-            title="Last Read"
-            subtitle={`Continue from page ${lastReadPage}`}
+            title={getTranslation("lastRead", currentLanguage)}
+            subtitle={`${getTranslation("continueFrom", currentLanguage)} ${lastReadPage}`}
             icon="time-outline"
             onPress={() =>
               router.push({
@@ -86,16 +93,22 @@ export default function HomeScreen() {
             }
           />
           <SectionCard
-            title="Go to Page"
-            subtitle="Open any page by number"
+            title={getTranslation("goToPage", currentLanguage)}
+            subtitle={getTranslation("openAnyPage", currentLanguage)}
             icon="arrow-forward-circle-outline"
             onPress={() => setIsJumpOpen(true)}
           />
           <SectionCard
-            title="Prayer Times"
-            subtitle="Full daily schedule"
+            title={getTranslation("prayerTimes", currentLanguage)}
+            subtitle={getTranslation("fullSchedule", currentLanguage)}
             icon="sunny-outline"
             onPress={() => router.push("/prayer-times")}
+          />
+          <SectionCard
+            title={getTranslation("settings", currentLanguage)}
+            subtitle="Theme & Language"
+            icon="settings-outline"
+            onPress={() => router.push("/settings")}
           />
         </ScrollView>
       </LinearGradient>
@@ -110,18 +123,34 @@ export default function HomeScreen() {
           onPress={() => setIsJumpOpen(false)}
         >
           <Pressable
-            style={styles.modalCard}
+            style={[styles.modalCard, { backgroundColor: themeColors.card }]}
             onPress={(e) => e.stopPropagation()}
           >
-            <Text style={styles.modalTitle}>Go to page</Text>
-            <Text style={styles.modalSubtitle}>Enter page number (1-610)</Text>
+            <Text style={[styles.modalTitle, { color: themeColors.text }]}>
+              {getTranslation("goToPage", currentLanguage)}
+            </Text>
+            <Text
+              style={[
+                styles.modalSubtitle,
+                { color: themeColors.textSecondary },
+              ]}
+            >
+              Enter page number (1-610)
+            </Text>
             <TextInput
               value={jumpValue}
               onChangeText={setJumpValue}
               placeholder="Enter page number"
-              placeholderTextColor={colors.muted}
+              placeholderTextColor={themeColors.textSecondary}
               keyboardType="number-pad"
-              style={styles.modalInput}
+              style={[
+                styles.modalInput,
+                {
+                  borderColor: themeColors.border,
+                  color: themeColors.text,
+                  backgroundColor: themeColors.background,
+                },
+              ]}
               autoFocus
             />
             <View style={styles.modalActions}>
@@ -129,19 +158,30 @@ export default function HomeScreen() {
                 onPress={() => setIsJumpOpen(false)}
                 style={({ pressed }) => [
                   styles.modalButton,
+                  { backgroundColor: themeColors.background },
                   pressed && styles.pressed,
                 ]}
               >
-                <Text style={styles.modalButtonTextMuted}>Cancel</Text>
+                <Text
+                  style={[
+                    styles.modalButtonTextMuted,
+                    { color: themeColors.textSecondary },
+                  ]}
+                >
+                  Cancel
+                </Text>
               </Pressable>
               <Pressable
                 onPress={handleJump}
                 style={({ pressed }) => [
                   styles.modalButtonPrimary,
+                  { backgroundColor: themeColors.primary },
                   pressed && styles.pressed,
                 ]}
               >
-                <Text style={styles.modalButtonText}>Go</Text>
+                <Text style={[styles.modalButtonText, { color: "#FFFFFF" }]}>
+                  Go
+                </Text>
               </Pressable>
             </View>
           </Pressable>
@@ -166,45 +206,38 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "700",
-    color: colors.backgroundAlt,
     marginBottom: spacing.sm,
   },
   subtitle: {
     fontSize: 15,
-    color: colors.accentSoft,
     textAlign: "center",
   },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
     padding: spacing.lg,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalCard: {
     borderRadius: borderRadius.xl,
     padding: spacing.xl,
-    backgroundColor: colors.backgroundAlt,
     ...shadows.lg,
   },
   modalTitle: {
     fontSize: 22,
     fontWeight: "700",
-    color: colors.text,
     marginBottom: spacing.xs,
   },
   modalSubtitle: {
     fontSize: 14,
-    color: colors.muted,
     marginBottom: spacing.md,
   },
   modalInput: {
     borderWidth: 2,
     borderRadius: borderRadius.md,
-    borderColor: colors.border,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     fontSize: 16,
-    color: colors.text,
-    backgroundColor: colors.background,
   },
   modalActions: {
     flexDirection: "row",
@@ -216,11 +249,9 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    backgroundColor: colors.background,
   },
   modalButtonPrimary: {
     borderRadius: borderRadius.md,
-    backgroundColor: colors.primary,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     ...shadows.sm,
@@ -228,12 +259,10 @@ const styles = StyleSheet.create({
   modalButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: colors.backgroundAlt,
   },
   modalButtonTextMuted: {
     fontSize: 16,
     fontWeight: "600",
-    color: colors.textSecondary,
   },
   pressed: {
     opacity: 0.85,

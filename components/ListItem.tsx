@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { borderRadius, colors, shadows, spacing } from "../utils/theme";
+import { useAppContext } from "../contexts/AppContext";
+import { borderRadius, shadows, spacing } from "../utils/theme";
 
 type ListItemProps = {
   title: string;
@@ -8,15 +9,24 @@ type ListItemProps = {
 };
 
 export default function ListItem({ title, rightText, onPress }: ListItemProps) {
+  const { themeColors } = useAppContext();
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.row,
+        { backgroundColor: themeColors.card },
+        pressed && styles.pressed,
+      ]}
     >
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, { color: themeColors.text }]}>{title}</Text>
       {rightText ? (
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{rightText}</Text>
+        <View
+          style={[styles.badge, { backgroundColor: themeColors.accentSoft }]}
+        >
+          <Text style={[styles.badgeText, { color: themeColors.primary }]}>
+            {rightText}
+          </Text>
         </View>
       ) : null}
     </Pressable>
@@ -31,7 +41,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.card,
     marginBottom: spacing.sm,
     ...shadows.sm,
   },
@@ -40,20 +49,17 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.98 }],
   },
   title: {
-    color: colors.text,
     fontSize: 16,
     fontWeight: "600",
     flex: 1,
   },
   badge: {
-    backgroundColor: colors.accentSoft,
     paddingHorizontal: spacing.sm,
     paddingVertical: 6,
     borderRadius: borderRadius.sm,
     marginLeft: spacing.md,
   },
   badgeText: {
-    color: colors.primary,
     fontSize: 13,
     fontWeight: "600",
   },

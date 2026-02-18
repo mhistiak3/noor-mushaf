@@ -2,14 +2,20 @@ import { router } from "expo-router";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import DetailedListItem from "../components/DetailedListItem";
 import SafeScreen from "../components/SafeScreen";
+import { useAppContext } from "../contexts/AppContext";
 import { paraList } from "../data/paraList";
-import { colors, spacing } from "../utils/theme";
+import { getTranslation } from "../utils/languages";
+import { spacing } from "../utils/theme";
 
 export default function ParaScreen() {
+  const { themeColors, currentLanguage } = useAppContext();
   return (
     <SafeScreen>
       <FlatList
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[
+          styles.list,
+          { backgroundColor: themeColors.background },
+        ]}
         data={paraList}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
@@ -29,9 +35,13 @@ export default function ParaScreen() {
         )}
         ListHeaderComponent={() => (
           <View style={styles.header}>
-            <Text style={styles.title}>All Para (Juz)</Text>
-            <Text style={styles.subtitle}>
-              30 divisions of the Quran for easy reading
+            <Text style={[styles.title, { color: themeColors.text }]}>
+              {getTranslation("allPara", currentLanguage)}
+            </Text>
+            <Text
+              style={[styles.subtitle, { color: themeColors.textSecondary }]}
+            >
+              {getTranslation("allParaDesc", currentLanguage)}
             </Text>
           </View>
         )}
@@ -43,7 +53,6 @@ export default function ParaScreen() {
 const styles = StyleSheet.create({
   list: {
     padding: spacing.lg,
-    backgroundColor: colors.background,
   },
   header: {
     marginBottom: spacing.lg,
@@ -51,11 +60,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "700",
-    color: colors.text,
   },
   subtitle: {
     marginTop: spacing.xs,
     fontSize: 14,
-    color: colors.textSecondary,
   },
 });

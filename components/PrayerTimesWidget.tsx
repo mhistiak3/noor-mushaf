@@ -1,12 +1,14 @@
 import * as Location from "expo-location";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { useAppContext } from "../contexts/AppContext";
+import { getTranslation } from "../utils/languages";
 import {
   getPrayerTimesCache,
   setPrayerTimesCache,
   type PrayerTimings,
 } from "../utils/storage";
-import { borderRadius, colors, shadows, spacing } from "../utils/theme";
+import { borderRadius, shadows, spacing } from "../utils/theme";
 
 type PrayerData = {
   hijriDate: string;
@@ -44,6 +46,7 @@ const getMinutesToMidnight = (): number => {
 };
 
 export default function PrayerTimesWidget() {
+  const { themeColors, currentLanguage } = useAppContext();
   const [prayerData, setPrayerData] = useState<PrayerData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -253,50 +256,87 @@ export default function PrayerTimesWidget() {
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="small" color={colors.primary} />
+      <View style={[styles.container, { backgroundColor: themeColors.card }]}>
+        <ActivityIndicator size="small" color={themeColors.primary} />
       </View>
     );
   }
 
   if (error || !prayerData) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>{error || "Unable to load"}</Text>
+      <View style={[styles.container, { backgroundColor: themeColors.card }]}>
+        <Text style={[styles.errorText, { color: themeColors.textSecondary }]}>
+          {error || "Unable to load"}
+        </Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: themeColors.card }]}>
       {/* Header with Dates */}
       <View style={styles.header}>
-        <View style={styles.hijriContainer}>
+        <View
+          style={[
+            styles.hijriContainer,
+            { backgroundColor: themeColors.primaryLight + "30" },
+          ]}
+        >
           <Text style={styles.hijriIcon}>🌙</Text>
-          <Text style={styles.hijriDate}>{prayerData.hijriDate}</Text>
+          <Text style={[styles.hijriDate, { color: themeColors.primary }]}>
+            {prayerData.hijriDate}
+          </Text>
         </View>
-        <Text style={styles.gregorianDate}>{prayerData.gregorianDate}</Text>
+        <Text
+          style={[styles.gregorianDate, { color: themeColors.textSecondary }]}
+        >
+          {prayerData.gregorianDate}
+        </Text>
       </View>
 
       {/* Main Content */}
       <View style={styles.mainContent}>
         {/* Current Prayer */}
-        <View style={styles.currentPrayerBox}>
-          <Text style={styles.currentLabel}>Current</Text>
-          <Text style={styles.currentPrayerName}>
+        <View
+          style={[
+            styles.currentPrayerBox,
+            { backgroundColor: themeColors.background },
+          ]}
+        >
+          <Text
+            style={[styles.currentLabel, { color: themeColors.textSecondary }]}
+          >
+            {getTranslation("currentPrayer", currentLanguage)}
+          </Text>
+          <Text style={[styles.currentPrayerName, { color: themeColors.text }]}>
             {prayerData.currentPrayer}
           </Text>
-          <Text style={styles.currentPrayerTime}>
+          <Text
+            style={[
+              styles.currentPrayerTime,
+              { color: themeColors.textSecondary },
+            ]}
+          >
             {formatTime(prayerData.currentPrayerTime)}
           </Text>
         </View>
 
         {/* Next Prayer Countdown */}
-        <View style={styles.nextPrayerBox}>
-          <Text style={styles.nextLabel}>Next: {prayerData.nextPrayer}</Text>
+        <View
+          style={[
+            styles.nextPrayerBox,
+            { backgroundColor: themeColors.primary },
+          ]}
+        >
+          <Text style={[styles.nextLabel, { color: "rgba(255,255,255,0.9)" }]}>
+            {getTranslation("nextPrayer", currentLanguage)}:{" "}
+            {prayerData.nextPrayer}
+          </Text>
           <View style={styles.countdownContainer}>
-            <Text style={styles.countdown}>{prayerData.timeRemaining}</Text>
-            <Text style={styles.nextTime}>
+            <Text style={[styles.countdown, { color: "#FFFFFF" }]}>
+              {prayerData.timeRemaining}
+            </Text>
+            <Text style={[styles.nextTime, { color: "rgba(255,255,255,0.8)" }]}>
               {formatTime(prayerData.nextPrayerTime)}
             </Text>
           </View>
@@ -305,15 +345,33 @@ export default function PrayerTimesWidget() {
 
       {/* Sahri and Iftar */}
       <View style={styles.specialTimesRow}>
-        <View style={styles.specialTimeBox}>
-          <Text style={styles.specialLabel}>Sahri</Text>
-          <Text style={styles.specialTime}>
+        <View
+          style={[
+            styles.specialTimeBox,
+            { backgroundColor: themeColors.background },
+          ]}
+        >
+          <Text
+            style={[styles.specialLabel, { color: themeColors.textSecondary }]}
+          >
+            {getTranslation("sahri", currentLanguage)}
+          </Text>
+          <Text style={[styles.specialTime, { color: themeColors.text }]}>
             {formatTime(prayerData.sahriTime)}
           </Text>
         </View>
-        <View style={styles.specialTimeBox}>
-          <Text style={styles.specialLabel}>Iftar</Text>
-          <Text style={styles.specialTime}>
+        <View
+          style={[
+            styles.specialTimeBox,
+            { backgroundColor: themeColors.background },
+          ]}
+        >
+          <Text
+            style={[styles.specialLabel, { color: themeColors.textSecondary }]}
+          >
+            {getTranslation("iftar", currentLanguage)}
+          </Text>
+          <Text style={[styles.specialTime, { color: themeColors.text }]}>
             {formatTime(prayerData.iftarTime)}
           </Text>
         </View>
@@ -352,11 +410,9 @@ function formatTime(time: string): string {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.card,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     width: "100%",
-    // marginHorizontal: spacing.lg,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
     ...shadows.md,
@@ -370,7 +426,6 @@ const styles = StyleSheet.create({
   hijriContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.primaryLight + "30",
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: borderRadius.full,
@@ -382,12 +437,10 @@ const styles = StyleSheet.create({
   hijriDate: {
     fontSize: 13,
     fontWeight: "600",
-    color: colors.primary,
   },
   gregorianDate: {
     fontSize: 12,
     fontWeight: "600",
-    color: colors.textSecondary,
   },
   mainContent: {
     flexDirection: "row",
@@ -396,36 +449,30 @@ const styles = StyleSheet.create({
   },
   currentPrayerBox: {
     flex: 1,
-    backgroundColor: colors.background,
     borderRadius: borderRadius.md,
     padding: spacing.sm,
     alignItems: "center",
   },
   currentLabel: {
     fontSize: 11,
-    color: colors.textSecondary,
     marginBottom: spacing.xs,
   },
   currentPrayerName: {
     fontSize: 18,
     fontWeight: "700",
-    color: colors.text,
   },
   currentPrayerTime: {
     fontSize: 12,
-    color: colors.textSecondary,
     marginTop: 2,
   },
   nextPrayerBox: {
     flex: 1.5,
-    backgroundColor: colors.primary,
     borderRadius: borderRadius.md,
     padding: spacing.sm,
     alignItems: "center",
   },
   nextLabel: {
     fontSize: 11,
-    color: "rgba(255,255,255,0.9)",
     marginBottom: spacing.xs,
     fontWeight: "600",
   },
@@ -435,11 +482,9 @@ const styles = StyleSheet.create({
   countdown: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#FFFFFF",
   },
   nextTime: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.8)",
     marginTop: 2,
   },
   specialTimesRow: {
@@ -448,24 +493,20 @@ const styles = StyleSheet.create({
   },
   specialTimeBox: {
     flex: 1,
-    backgroundColor: colors.background,
     borderRadius: borderRadius.md,
     paddingVertical: spacing.sm,
     alignItems: "center",
   },
   specialLabel: {
     fontSize: 11,
-    color: colors.textSecondary,
     marginBottom: spacing.xs,
   },
   specialTime: {
     fontSize: 16,
     fontWeight: "700",
-    color: colors.text,
   },
   errorText: {
     fontSize: 13,
-    color: colors.textSecondary,
     textAlign: "center",
   },
 });

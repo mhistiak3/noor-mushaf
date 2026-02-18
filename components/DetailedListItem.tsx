@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { borderRadius, colors, shadows, spacing } from "../utils/theme";
+import { useAppContext } from "../contexts/AppContext";
+import { borderRadius, shadows, spacing } from "../utils/theme";
 
 type DetailedListItemProps = {
   title: string;
@@ -21,37 +22,85 @@ export default function DetailedListItem({
   icon,
   onPress,
 }: DetailedListItemProps) {
+  const { themeColors } = useAppContext();
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.card,
+        { backgroundColor: themeColors.card },
+        pressed && styles.pressed,
+      ]}
     >
       {icon && (
-        <View style={styles.iconContainer}>
-          <Ionicons name={icon} size={20} color={colors.primary} />
+        <View
+          style={[
+            styles.iconContainer,
+            { backgroundColor: themeColors.primaryLight },
+          ]}
+        >
+          <Ionicons name={icon} size={20} color={themeColors.primary} />
         </View>
       )}
       <View style={styles.content}>
-        <Text style={styles.title}>{title}</Text>
-        {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+        <Text style={[styles.title, { color: themeColors.text }]}>{title}</Text>
+        {subtitle && (
+          <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
+            {subtitle}
+          </Text>
+        )}
         {(info1 || info2) && (
           <View style={styles.infoRow}>
             {info1 && (
-              <View style={styles.infoChip}>
-                <Text style={styles.infoText}>{info1}</Text>
+              <View
+                style={[
+                  styles.infoChip,
+                  {
+                    backgroundColor: themeColors.background,
+                    borderColor: themeColors.border,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.infoText,
+                    { color: themeColors.textSecondary },
+                  ]}
+                >
+                  {info1}
+                </Text>
               </View>
             )}
             {info2 && (
-              <View style={styles.infoChip}>
-                <Text style={styles.infoText}>{info2}</Text>
+              <View
+                style={[
+                  styles.infoChip,
+                  {
+                    backgroundColor: themeColors.background,
+                    borderColor: themeColors.border,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.infoText,
+                    { color: themeColors.textSecondary },
+                  ]}
+                >
+                  {info2}
+                </Text>
               </View>
             )}
           </View>
         )}
       </View>
       {badge && (
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{badge}</Text>
+        <View
+          style={[styles.badge, { backgroundColor: themeColors.primaryLight }]}
+        >
+          <Text style={[styles.badgeText, { color: themeColors.primary }]}>
+            {badge}
+          </Text>
         </View>
       )}
     </Pressable>
@@ -65,7 +114,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     borderRadius: borderRadius.lg,
-    backgroundColor: colors.card,
     marginBottom: spacing.md,
     ...shadows.sm,
   },
@@ -77,7 +125,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: borderRadius.sm,
-    backgroundColor: colors.accentSoft,
     alignItems: "center",
     justifyContent: "center",
     marginRight: spacing.md,
@@ -86,13 +133,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: colors.text,
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 2,
   },
   subtitle: {
-    color: colors.textSecondary,
     fontSize: 13,
     marginBottom: spacing.xs,
   },
@@ -103,27 +148,22 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   infoChip: {
-    backgroundColor: colors.background,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderRadius: borderRadius.sm,
     borderWidth: 1,
-    borderColor: colors.border,
   },
   infoText: {
-    color: colors.textSecondary,
     fontSize: 11,
     fontWeight: "500",
   },
   badge: {
-    backgroundColor: colors.accentSoft,
     paddingHorizontal: spacing.sm,
     paddingVertical: 6,
     borderRadius: borderRadius.sm,
     marginLeft: spacing.sm,
   },
   badgeText: {
-    color: colors.primary,
     fontSize: 12,
     fontWeight: "600",
   },

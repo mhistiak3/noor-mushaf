@@ -1,8 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import type { LanguageCode } from "./languages";
+import type { ThemeName } from "./themes";
 
 const BOOKMARKS_KEY = "bookmarks";
 const LAST_READ_KEY = "lastReadPage";
 const PRAYER_TIMES_CACHE_KEY = "prayerTimesCache";
+const THEME_KEY = "appTheme";
+const LANGUAGE_KEY = "appLanguage";
 
 export type PrayerTimings = {
   Imsak: string;
@@ -73,4 +77,33 @@ export async function setPrayerTimesCache(
   cache: PrayerTimesCache,
 ): Promise<void> {
   await AsyncStorage.setItem(PRAYER_TIMES_CACHE_KEY, JSON.stringify(cache));
+}
+export async function getTheme(): Promise<ThemeName> {
+  const raw = await AsyncStorage.getItem(THEME_KEY);
+  if (!raw) return "ocean";
+  const theme = raw as ThemeName;
+  const validThemes: ThemeName[] = [
+    "ocean",
+    "forest",
+    "sunset",
+    "midnight",
+    "lavender",
+    "coral",
+  ];
+  return validThemes.includes(theme) ? theme : "ocean";
+}
+
+export async function setTheme(theme: ThemeName): Promise<void> {
+  await AsyncStorage.setItem(THEME_KEY, theme);
+}
+
+export async function getLanguage(): Promise<LanguageCode> {
+  const raw = await AsyncStorage.getItem(LANGUAGE_KEY);
+  if (!raw) return "en";
+  const lang = raw as LanguageCode;
+  return lang === "en" || lang === "bn" ? lang : "en";
+}
+
+export async function setLanguage(language: LanguageCode): Promise<void> {
+  await AsyncStorage.setItem(LANGUAGE_KEY, language);
 }
