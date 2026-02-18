@@ -26,7 +26,12 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.istiakahsorganization.noormushaf",
-      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "output": "static",
@@ -58,6 +63,12 @@
         "projectId": "af3ea616-8d19-42bd-a051-112dea72fb53"
       }
     },
-    "owner": "istiak-ahs-organization"
+    "owner": "istiak-ahs-organization",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/af3ea616-8d19-42bd-a051-112dea72fb53"
+    }
   }
 }
