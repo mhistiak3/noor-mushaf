@@ -19,6 +19,7 @@ export type PrayerTimings = {
 export type PrayerTimesCache = {
   fetchedAt: number;
   hijriDate: string;
+  hijriDay: number; // Hijri day for cache validation
   gregorianDate: string;
   timings: PrayerTimings;
 };

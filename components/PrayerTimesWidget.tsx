@@ -29,7 +29,19 @@ const PRAYER_NAMES: (keyof PrayerTimings)[] = [
   "Isha",
 ];
 
-const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
+// Cache expires at midnight (new Islamic/Gregorian day)
+const getMinutesToMidnight = (): number => {
+  const now = new Date();
+  const tomorrow = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + 1,
+    0,
+    0,
+    0,
+  );
+  return Math.floor((tomorrow.getTime() - now.getTime()) / 1000 / 60);
+};
 
 export default function PrayerTimesWidget() {
   const [prayerData, setPrayerData] = useState<PrayerData | null>(null);
@@ -148,18 +160,23 @@ export default function PrayerTimesWidget() {
     const cached = await getPrayerTimesCache();
     let hasCache = false;
 
-    if (cached) {
+    // Check if cache is valid by comparing Hijri date
+    // Cache is valid only if it's from the same Islamic date
+    const today = new Date();
+    const isCacheFromToday =
+      cached && cached.hijriDate && cached.fetchedAt
+        ? // Check if fetched within last 24 hours (same day)
+          today.getTime() - cached.fetchedAt < 24 * 60 * 60 * 1000
+        : false;
+
+    if (cached && isCacheFromToday) {
       setPrayerData(
         buildPrayerData(cached.timings, cached.hijriDate, cached.gregorianDate),
       );
       setLoading(false);
       setError(null);
       hasCache = true;
-    }
-
-    const isStale = !cached || Date.now() - cached.fetchedAt > CACHE_TTL_MS;
-    if (!isStale) {
-      return;
+      return; // Cache is fresh, no need to fetch
     }
 
     try {
@@ -172,7 +189,8 @@ export default function PrayerTimesWidget() {
       setPrayerData(nextData);
       setLoading(false);
       setError(null);
-      await setPrayerTimesCache({ fetchedAt: Date.now(), ...fresh });
+      const hijriDay = Number(fresh.hijriDate.split(" ")[0]);
+      await setPrayerTimesCache({ fetchedAt: Date.now(), hijriDay, ...fresh });
     } catch (err) {
       if (!hasCache) {
         const message =
@@ -190,19 +208,22 @@ export default function PrayerTimesWidget() {
   }, [loadPrayerTimes]);
 
   useEffect(() => {
-    // Update time remaining every minute
+    // Recalculate current prayer time every 30 seconds
+    // This ensures prayer times update as time passes (e.g., Asr → Maghrib)
     const interval = setInterval(() => {
       setPrayerData((prev) => {
         if (!prev) return null;
-        return {
-          ...prev,
-          timeRemaining: calculateTimeRemaining(prev.nextPrayerTime),
-        };
+        // Rebuild prayer data with current time to recalculate current/next prayer
+        return buildPrayerData(
+          prev.allPrayers,
+          prev.hijriDate,
+          prev.gregorianDate,
+        );
       });
-    }, 60000);
+    }, 30000); // Check every 30 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [buildPrayerData]);
 
   if (loading) {
     return (

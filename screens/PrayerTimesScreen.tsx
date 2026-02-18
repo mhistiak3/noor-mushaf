@@ -29,8 +29,6 @@ type DetailRow = {
   showRange?: boolean;
 };
 
-const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
-
 export default function PrayerTimesScreen() {
   const [prayerData, setPrayerData] = useState<PrayerData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -86,7 +84,15 @@ export default function PrayerTimesScreen() {
     const cached = await getPrayerTimesCache();
     let hasCache = false;
 
-    if (cached) {
+    // Check if cache is valid by checking if it's from today (within 24 hours)
+    // Prayer times change daily, so 24-hour cache is safe
+    const today = new Date();
+    const isCacheFromToday =
+      cached && cached.hijriDate && cached.fetchedAt
+        ? today.getTime() - cached.fetchedAt < 24 * 60 * 60 * 1000
+        : false;
+
+    if (cached && isCacheFromToday) {
       setPrayerData({
         hijriDate: cached.hijriDate,
         gregorianDate: cached.gregorianDate,
@@ -95,11 +101,7 @@ export default function PrayerTimesScreen() {
       setLoading(false);
       setError(null);
       hasCache = true;
-    }
-
-    const isStale = !cached || Date.now() - cached.fetchedAt > CACHE_TTL_MS;
-    if (!isStale) {
-      return;
+      return; // Cache is fresh, no need to fetch
     }
 
     try {
@@ -107,7 +109,8 @@ export default function PrayerTimesScreen() {
       setPrayerData(fresh);
       setLoading(false);
       setError(null);
-      await setPrayerTimesCache({ fetchedAt: Date.now(), ...fresh });
+      const hijriDay = Number(fresh.hijriDate.split(" ")[0]);
+      await setPrayerTimesCache({ fetchedAt: Date.now(), hijriDay, ...fresh });
     } catch (err) {
       if (!hasCache) {
         const message =
@@ -123,6 +126,16 @@ export default function PrayerTimesScreen() {
   useEffect(() => {
     loadPrayerTimes();
   }, [loadPrayerTimes]);
+
+  // Update current prayer time every 30 seconds as time passes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Force re-render to recalculate currentKey based on new time
+      setPrayerData((prev) => (prev ? { ...prev } : null));
+    }, 30000); // Check every 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   const farzRows: DetailRow[] = useMemo(
     () => [
