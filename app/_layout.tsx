@@ -20,6 +20,7 @@ export default function RootLayout() {
         <Stack.Screen name="para" options={{ title: "All Para" }} />
         <Stack.Screen name="sura" options={{ title: "All Sura" }} />
         <Stack.Screen name="bookmarks" options={{ title: "Bookmarks" }} />
+        <Stack.Screen name="prayer-times" options={{ title: "Prayer Times" }} />
         <Stack.Screen name="reader" options={{ title: "Quran Reader" }} />
       </Stack>
     </>

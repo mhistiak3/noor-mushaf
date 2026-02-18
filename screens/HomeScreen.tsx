@@ -91,6 +91,12 @@ export default function HomeScreen() {
             icon="arrow-forward-circle-outline"
             onPress={() => setIsJumpOpen(true)}
           />
+          <SectionCard
+            title="Prayer Times"
+            subtitle="Full daily schedule"
+            icon="sunny-outline"
+            onPress={() => router.push("/prayer-times")}
+          />
         </ScrollView>
       </LinearGradient>
       <Modal

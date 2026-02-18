@@ -14,11 +14,12 @@ import { colors, spacing } from "../utils/theme";
 export default function UpdateChecker() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [isProduction, setIsProduction] = useState(false);
+  const updatesEnabled = Updates.isEnabled;
+  const isDev = __DEV__;
 
   const checkForUpdates = useCallback(async () => {
-    // Only check for updates in production (non-Expo Go)
-    if (!isProduction) {
+    // Expo Go does not support updates
+    if (!updatesEnabled || isDev) {
       return;
     }
 
@@ -28,9 +29,9 @@ export default function UpdateChecker() {
         setUpdateAvailable(true);
       }
     } catch (error) {
-      console.error("Error checking for updates:", error);
+      // Silently ignore update check errors in dev
     }
-  }, [isProduction]);
+  }, [updatesEnabled, isDev]);
 
   const handleUpdate = useCallback(async () => {
     try {
@@ -49,30 +50,8 @@ export default function UpdateChecker() {
   }, []);
 
   useEffect(() => {
-    // Check if running in production (not Expo Go)
-    const checkEnvironment = async () => {
-      try {
-        const updateId = Updates.updateId;
-
-        // If we have an updateId, we're in a production build (EAS)
-        // In Expo Go, updateId will be null or undefined
-        if (updateId && updateId !== "0") {
-          setIsProduction(true);
-        } else {
-          setIsProduction(false);
-        }
-      } catch (error) {
-        console.error("Error checking environment:", error);
-        setIsProduction(false);
-      }
-    };
-
-    checkEnvironment();
-  }, []);
-
-  useEffect(() => {
-    // Check for updates when app starts (only in production)
-    if (!isProduction) {
+    // Check for updates when app starts (only when enabled)
+    if (!updatesEnabled || isDev) {
       return;
     }
 
@@ -81,7 +60,7 @@ export default function UpdateChecker() {
     // Optionally check for updates every 30 minutes
     const interval = setInterval(checkForUpdates, 30 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [isProduction, checkForUpdates]);
+  }, [updatesEnabled, isDev, checkForUpdates]);
 
   return (
     <Modal

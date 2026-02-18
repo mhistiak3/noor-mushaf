@@ -1,15 +1,12 @@
 import * as Location from "expo-location";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  getPrayerTimesCache,
+  setPrayerTimesCache,
+  type PrayerTimings,
+} from "../utils/storage";
 import { borderRadius, colors, shadows, spacing } from "../utils/theme";
-
-type PrayerTimes = {
-  Fajr: string;
-  Dhuhr: string;
-  Asr: string;
-  Maghrib: string;
-  Isha: string;
-};
 
 type PrayerData = {
   hijriDate: string;
@@ -19,10 +16,12 @@ type PrayerData = {
   nextPrayer: string;
   nextPrayerTime: string;
   timeRemaining: string;
-  allPrayers: PrayerTimes;
+  iftarTime: string;
+  sahriTime: string;
+  allPrayers: PrayerTimings;
 };
 
-const PRAYER_NAMES: (keyof PrayerTimes)[] = [
+const PRAYER_NAMES: (keyof PrayerTimings)[] = [
   "Fajr",
   "Dhuhr",
   "Asr",
@@ -30,27 +29,76 @@ const PRAYER_NAMES: (keyof PrayerTimes)[] = [
   "Isha",
 ];
 
+const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
+
 export default function PrayerTimesWidget() {
   const [prayerData, setPrayerData] = useState<PrayerData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPrayerTimes = useCallback(async () => {
+  const buildPrayerData = useCallback(
+    (
+      timings: PrayerTimings,
+      hijriDate: string,
+      gregorianDate: string,
+    ): PrayerData => {
+      const now = new Date();
+      const currentTime = now.getHours() * 60 + now.getMinutes();
+
+      let currentPrayer = "";
+      let nextPrayer = "";
+      let nextPrayerTime = "";
+
+      for (let i = 0; i < PRAYER_NAMES.length; i++) {
+        const prayerName = PRAYER_NAMES[i];
+        const [hours, minutes] = timings[prayerName].split(":").map(Number);
+        const prayerTime = hours * 60 + minutes;
+
+        if (currentTime < prayerTime) {
+          nextPrayer = prayerName;
+          nextPrayerTime = timings[prayerName];
+          currentPrayer = i > 0 ? PRAYER_NAMES[i - 1] : "Isha";
+          break;
+        }
+      }
+
+      if (!nextPrayer) {
+        nextPrayer = "Fajr";
+        nextPrayerTime = timings.Fajr;
+        currentPrayer = "Isha";
+      }
+
+      const currentPrayerTime =
+        timings[currentPrayer as keyof PrayerTimings] || timings.Isha;
+
+      return {
+        hijriDate,
+        gregorianDate,
+        currentPrayer,
+        currentPrayerTime,
+        nextPrayer,
+        nextPrayerTime,
+        timeRemaining: calculateTimeRemaining(nextPrayerTime),
+        iftarTime: timings.Maghrib,
+        sahriTime: timings.Imsak,
+        allPrayers: timings,
+      };
+    },
+    [],
+  );
+
+  const fetchPrayerTimesFromApi = useCallback(async () => {
     try {
       // Request location permission
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        setError("Location permission required");
-        setLoading(false);
-        return;
+        throw new Error("Location permission required");
       }
 
       // Check if location services are enabled
       const isEnabled = await Location.hasServicesEnabledAsync();
       if (!isEnabled) {
-        setError("Please enable location services");
-        setLoading(false);
-        return;
+        throw new Error("Please enable location services");
       }
 
       // Get current location with timeout
@@ -71,12 +119,16 @@ export default function PrayerTimesWidget() {
         throw new Error("Failed to fetch prayer times");
       }
 
-      const timings: PrayerTimes = {
+      const timings: PrayerTimings = {
+        Imsak: data.data.timings.Imsak,
         Fajr: data.data.timings.Fajr,
+        Sunrise: data.data.timings.Sunrise,
         Dhuhr: data.data.timings.Dhuhr,
         Asr: data.data.timings.Asr,
         Maghrib: data.data.timings.Maghrib,
         Isha: data.data.timings.Isha,
+        Sunset: data.data.timings.Sunset,
+        Midnight: data.data.timings.Midnight,
       };
 
       // Get Hijri date
@@ -85,84 +137,57 @@ export default function PrayerTimesWidget() {
       const gregorian = data.data.date.gregorian;
       const gregorianDate = `${gregorian.day} ${gregorian.month.en} ${gregorian.year}`;
 
-      // Calculate current and next prayer
-      const now = new Date();
-      const currentTime = now.getHours() * 60 + now.getMinutes();
-
-      let currentPrayer = "";
-      let nextPrayer = "";
-      let nextPrayerTime = "";
-
-      // Find current and next prayer
-      for (let i = 0; i < PRAYER_NAMES.length; i++) {
-        const prayerName = PRAYER_NAMES[i];
-        const [hours, minutes] = timings[prayerName].split(":").map(Number);
-        const prayerTime = hours * 60 + minutes;
-
-        if (currentTime < prayerTime) {
-          nextPrayer = prayerName;
-          nextPrayerTime = timings[prayerName];
-          currentPrayer = i > 0 ? PRAYER_NAMES[i - 1] : "Isha";
-          break;
-        }
-      }
-
-      // If no next prayer found today, next is Fajr tomorrow
-      if (!nextPrayer) {
-        nextPrayer = "Fajr";
-        nextPrayerTime = timings.Fajr;
-        currentPrayer = "Isha";
-      }
-
-      const currentPrayerTime =
-        timings[currentPrayer as keyof PrayerTimes] || timings.Isha;
-
-      setPrayerData({
-        hijriDate,
-        gregorianDate,
-        currentPrayer,
-        currentPrayerTime,
-        nextPrayer,
-        nextPrayerTime,
-        timeRemaining: calculateTimeRemaining(nextPrayerTime),
-        allPrayers: timings,
-      });
-      setLoading(false);
-      setError(null);
+      return { hijriDate, gregorianDate, timings };
     } catch (err) {
-      setError("Unable to load prayer times");
-      setLoading(false);
-      console.error(err);
+      throw err;
     }
   }, []);
 
-  const calculateTimeRemaining = (prayerTime: string): string => {
-    const now = new Date();
-    const [hours, minutes] = prayerTime.split(":").map(Number);
+  const loadPrayerTimes = useCallback(async () => {
+    setLoading(true);
+    const cached = await getPrayerTimesCache();
+    let hasCache = false;
 
-    const prayerDate = new Date();
-    prayerDate.setHours(hours, minutes, 0, 0);
-
-    // If prayer time has passed, it's tomorrow
-    if (prayerDate < now) {
-      prayerDate.setDate(prayerDate.getDate() + 1);
+    if (cached) {
+      setPrayerData(
+        buildPrayerData(cached.timings, cached.hijriDate, cached.gregorianDate),
+      );
+      setLoading(false);
+      setError(null);
+      hasCache = true;
     }
 
-    const diff = prayerDate.getTime() - now.getTime();
-    const hoursRemaining = Math.floor(diff / (1000 * 60 * 60));
-    const minutesRemaining = Math.floor(
-      (diff % (1000 * 60 * 60)) / (1000 * 60),
-    );
-
-    if (hoursRemaining === 0) {
-      return `${minutesRemaining} min`;
+    const isStale = !cached || Date.now() - cached.fetchedAt > CACHE_TTL_MS;
+    if (!isStale) {
+      return;
     }
-    return `${hoursRemaining}h ${minutesRemaining}m`;
-  };
+
+    try {
+      const fresh = await fetchPrayerTimesFromApi();
+      const nextData = buildPrayerData(
+        fresh.timings,
+        fresh.hijriDate,
+        fresh.gregorianDate,
+      );
+      setPrayerData(nextData);
+      setLoading(false);
+      setError(null);
+      await setPrayerTimesCache({ fetchedAt: Date.now(), ...fresh });
+    } catch (err) {
+      if (!hasCache) {
+        const message =
+          err instanceof Error && err.message
+            ? err.message
+            : "Unable to load prayer times";
+        setError(message);
+        setLoading(false);
+      }
+    }
+  }, [buildPrayerData, fetchPrayerTimesFromApi]);
 
   useEffect(() => {
-    fetchPrayerTimes();
-  }, [fetchPrayerTimes]);
+    loadPrayerTimes();
+  }, [loadPrayerTimes]);
 
   useEffect(() => {
     // Update time remaining every minute
@@ -231,38 +256,44 @@ export default function PrayerTimesWidget() {
         </View>
       </View>
 
-      {/* All Prayer Times */}
-      <View style={styles.allPrayersContainer}>
-        {PRAYER_NAMES.map((prayer) => (
-          <View
-            key={prayer}
-            style={[
-              styles.prayerTimeItem,
-              prayer === prayerData.nextPrayer && styles.prayerTimeItemActive,
-            ]}
-          >
-            <Text
-              style={[
-                styles.prayerTimeLabel,
-                prayer === prayerData.nextPrayer &&
-                  styles.prayerTimeLabelActive,
-              ]}
-            >
-              {prayer}
-            </Text>
-            <Text
-              style={[
-                styles.prayerTime,
-                prayer === prayerData.nextPrayer && styles.prayerTimeActive,
-              ]}
-            >
-              {formatTime(prayerData.allPrayers[prayer])}
-            </Text>
-          </View>
-        ))}
+      {/* Sahri and Iftar */}
+      <View style={styles.specialTimesRow}>
+        <View style={styles.specialTimeBox}>
+          <Text style={styles.specialLabel}>Sahri</Text>
+          <Text style={styles.specialTime}>
+            {formatTime(prayerData.sahriTime)}
+          </Text>
+        </View>
+        <View style={styles.specialTimeBox}>
+          <Text style={styles.specialLabel}>Iftar</Text>
+          <Text style={styles.specialTime}>
+            {formatTime(prayerData.iftarTime)}
+          </Text>
+        </View>
       </View>
     </View>
   );
+}
+
+function calculateTimeRemaining(prayerTime: string): string {
+  const now = new Date();
+  const [hours, minutes] = prayerTime.split(":").map(Number);
+
+  const prayerDate = new Date();
+  prayerDate.setHours(hours, minutes, 0, 0);
+
+  if (prayerDate < now) {
+    prayerDate.setDate(prayerDate.getDate() + 1);
+  }
+
+  const diff = prayerDate.getTime() - now.getTime();
+  const hoursRemaining = Math.floor(diff / (1000 * 60 * 60));
+  const minutesRemaining = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (hoursRemaining === 0) {
+    return `${minutesRemaining} min`;
+  }
+  return `${hoursRemaining}h ${minutesRemaining}m`;
 }
 
 function formatTime(time: string): string {
@@ -364,36 +395,26 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.8)",
     marginTop: 2,
   },
-  allPrayersContainer: {
+  specialTimesRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    gap: spacing.sm,
   },
-  prayerTimeItem: {
-    alignItems: "center",
+  specialTimeBox: {
     flex: 1,
-    paddingVertical: spacing.xs,
+    backgroundColor: colors.background,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.sm,
+    alignItems: "center",
   },
-  prayerTimeItemActive: {
-    backgroundColor: colors.primaryLight + "30",
-    borderRadius: borderRadius.sm,
-  },
-  prayerTimeLabel: {
-    fontSize: 10,
-    color: colors.textSecondary,
-    marginBottom: 2,
-  },
-  prayerTimeLabelActive: {
-    color: colors.primary,
-    fontWeight: "600",
-  },
-  prayerTime: {
+  specialLabel: {
     fontSize: 11,
-    color: colors.text,
-    fontWeight: "500",
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
   },
-  prayerTimeActive: {
-    color: colors.primary,
+  specialTime: {
+    fontSize: 16,
     fontWeight: "700",
+    color: colors.text,
   },
   errorText: {
     fontSize: 13,
