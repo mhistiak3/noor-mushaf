@@ -283,7 +283,7 @@ export default function PrayerTimesWidget() {
           ]}
         >
           <Text style={styles.hijriIcon}>🌙</Text>
-          <Text style={[styles.hijriDate, { color: themeColors.primary }]}>
+          <Text style={[styles.hijriDate, { color: themeColors.text }]}>
             {prayerData.hijriDate}
           </Text>
         </View>

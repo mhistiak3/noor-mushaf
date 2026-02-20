@@ -246,7 +246,7 @@ export default function PrayerTimesScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.container,
-          { backgroundColor: themeColors.background },
+          { backgroundColor: themeColors.background, height: "100%" },
         ]}
       >
         <View style={styles.header}>
@@ -257,7 +257,7 @@ export default function PrayerTimesScreen() {
             ]}
           >
             <Text style={styles.hijriIcon}>🌙</Text>
-            <Text style={[styles.hijriDate, { color: themeColors.primary }]}>
+            <Text style={[styles.hijriDate, { color: themeColors.text }]}>
               {prayerData.hijriDate}
             </Text>
           </View>
